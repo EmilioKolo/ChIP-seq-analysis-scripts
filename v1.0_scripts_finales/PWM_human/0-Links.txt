@@ -1,0 +1,213 @@
+
+Fuente: 
+Links a PWM en summary.tsv
+ChIP-seq AndersonTotal largo1500 HOCOMOCO oops
+
+Genes seleccionados:
+E-VALUE menor a 1e-7 (links HOCOMOCO dan p-valor de 0.0001 alrededor de 1e-7~1e-8)
+Genes en humano (HUMAN)
+
+________________________________________________________________
+
+. TBX20_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/TBX20_HUMAN.H11MO.0.D
+. MEIS1_HUMAN.H11MO.1.B	http://hocomoco.autosome.ru/motif/MEIS1_HUMAN.H11MO.1.B
+. GATA1_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/GATA1_HUMAN.H11MO.1.A
+MEIS3_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/MEIS3_HUMAN.H11MO.0.D
+. TGIF1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/TGIF1_HUMAN.H11MO.0.A
+. GATA4_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/GATA4_HUMAN.H11MO.0.A
+GATA1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/GATA1_HUMAN.H11MO.0.A
+GATA2_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/GATA2_HUMAN.H11MO.1.A
+TAL1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/TAL1_HUMAN.H11MO.0.A
+GATA2_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/GATA2_HUMAN.H11MO.0.A
+. GATA6_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/GATA6_HUMAN.H11MO.0.A
+. MAF_HUMAN.H11MO.1.B	http://hocomoco.autosome.ru/motif/MAF_HUMAN.H11MO.1.B
+TGIF2_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/TGIF2_HUMAN.H11MO.0.D
+MEIS2_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/MEIS2_HUMAN.H11MO.0.B
+. NKX25_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/NKX25_HUMAN.H11MO.0.B
+
+. HAND1_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/HAND1_HUMAN.H11MO.0.D
+
+### Bajados hasta aca ###
+
+PBX3_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/PBX3_HUMAN.H11MO.0.A
+PKNX1_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/PKNX1_HUMAN.H11MO.0.B
+GATA3_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/GATA3_HUMAN.H11MO.0.A
+PBX1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/PBX1_HUMAN.H11MO.0.A
+EOMES_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/EOMES_HUMAN.H11MO.0.D
+
+MAFB_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/MAFB_HUMAN.H11MO.0.B
+HMX3_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/HMX3_HUMAN.H11MO.0.D
+MAFF_HUMAN.H11MO.1.B	http://hocomoco.autosome.ru/motif/MAFF_HUMAN.H11MO.1.B
+NRL_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/NRL_HUMAN.H11MO.0.D
+MYOD1_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/MYOD1_HUMAN.H11MO.1.A
+MYB_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/MYB_HUMAN.H11MO.0.A
+MAFG_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/MAFG_HUMAN.H11MO.1.A
+ZN563_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ZN563_HUMAN.H11MO.0.C
+ZIC2_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/ZIC2_HUMAN.H11MO.0.D
+BRAC_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/BRAC_HUMAN.H11MO.0.A
+SMAD1_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/SMAD1_HUMAN.H11MO.0.D
+ISL2_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/ISL2_HUMAN.H11MO.0.D
+SMAD3_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/SMAD3_HUMAN.H11MO.0.B
+PBX3_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/PBX3_HUMAN.H11MO.1.A
+MYOG_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/MYOG_HUMAN.H11MO.0.B
+ZN563_HUMAN.H11MO.1.C	http://hocomoco.autosome.ru/motif/ZN563_HUMAN.H11MO.1.C
+PAX2_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/PAX2_HUMAN.H11MO.0.D
+TF2LX_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/TF2LX_HUMAN.H11MO.0.D
+HMX2_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/HMX2_HUMAN.H11MO.0.D
+NDF2_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/NDF2_HUMAN.H11MO.0.B
+TBX21_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/TBX21_HUMAN.H11MO.0.A
+SMAD4_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/SMAD4_HUMAN.H11MO.0.B
+NGN2_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/NGN2_HUMAN.H11MO.0.D
+LYL1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/LYL1_HUMAN.H11MO.0.A
+ATOH1_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/ATOH1_HUMAN.H11MO.0.B
+PTF1A_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/PTF1A_HUMAN.H11MO.0.B
+NR4A2_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/NR4A2_HUMAN.H11MO.0.C
+ZIC3_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/ZIC3_HUMAN.H11MO.0.B
+ZN317_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ZN317_HUMAN.H11MO.0.C
+MAF_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/MAF_HUMAN.H11MO.0.A
+PTF1A_HUMAN.H11MO.1.B	http://hocomoco.autosome.ru/motif/PTF1A_HUMAN.H11MO.1.B
+ASCL2_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/ASCL2_HUMAN.H11MO.0.D
+ZN134_HUMAN.H11MO.1.C	http://hocomoco.autosome.ru/motif/ZN134_HUMAN.H11MO.1.C
+OLIG2_HUMAN.H11MO.1.B	http://hocomoco.autosome.ru/motif/OLIG2_HUMAN.H11MO.1.B
+ERR1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/ERR1_HUMAN.H11MO.0.A
+NFIC_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/NFIC_HUMAN.H11MO.0.A
+PPARA_HUMAN.H11MO.1.B	http://hocomoco.autosome.ru/motif/PPARA_HUMAN.H11MO.1.B
+COE1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/COE1_HUMAN.H11MO.0.A
+MAFG_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/MAFG_HUMAN.H11MO.0.A
+MYOD1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/MYOD1_HUMAN.H11MO.0.A
+PPARG_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/PPARG_HUMAN.H11MO.0.A
+NR4A1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/NR4A1_HUMAN.H11MO.0.A
+HIF1A_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/HIF1A_HUMAN.H11MO.0.C
+TF7L2_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/TF7L2_HUMAN.H11MO.0.A
+ZN667_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ZN667_HUMAN.H11MO.0.C
+NDF1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/NDF1_HUMAN.H11MO.0.A
+PPARG_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/PPARG_HUMAN.H11MO.1.A
+CLOCK_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/CLOCK_HUMAN.H11MO.0.C
+XBP1_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/XBP1_HUMAN.H11MO.0.D
+TFAP4_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/TFAP4_HUMAN.H11MO.0.A
+PPARD_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/PPARD_HUMAN.H11MO.0.D
+OLIG2_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/OLIG2_HUMAN.H11MO.0.B
+ATF2_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/ATF2_HUMAN.H11MO.0.B
+HNF4G_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/HNF4G_HUMAN.H11MO.0.B
+TAL1_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/TAL1_HUMAN.H11MO.1.A
+BRAC_HUMAN.H11MO.1.B	http://hocomoco.autosome.ru/motif/BRAC_HUMAN.H11MO.1.B
+ZN341_HUMAN.H11MO.1.C	http://hocomoco.autosome.ru/motif/ZN341_HUMAN.H11MO.1.C
+ASCL1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/ASCL1_HUMAN.H11MO.0.A
+SMAD2_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/SMAD2_HUMAN.H11MO.0.A
+BHA15_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/BHA15_HUMAN.H11MO.0.B
+STF1_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/STF1_HUMAN.H11MO.0.B
+MAFK_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/MAFK_HUMAN.H11MO.0.A
+NR1H4_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/NR1H4_HUMAN.H11MO.0.B
+COT1_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/COT1_HUMAN.H11MO.0.C
+HES1_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/HES1_HUMAN.H11MO.0.D
+EGR3_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/EGR3_HUMAN.H11MO.0.D
+ERR2_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/ERR2_HUMAN.H11MO.0.A
+TFCP2_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/TFCP2_HUMAN.H11MO.0.D
+CREM_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/CREM_HUMAN.H11MO.0.C
+NR5A2_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/NR5A2_HUMAN.H11MO.0.B
+PRGR_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/PRGR_HUMAN.H11MO.1.A
+PDX1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/PDX1_HUMAN.H11MO.0.A
+ETV1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/ETV1_HUMAN.H11MO.0.A
+NR1H3_HUMAN.H11MO.1.B	http://hocomoco.autosome.ru/motif/NR1H3_HUMAN.H11MO.1.B
+RARA_HUMAN.H11MO.2.A	http://hocomoco.autosome.ru/motif/RARA_HUMAN.H11MO.2.A
+10-AAGGTCA	http://hocomoco.autosome.ru/motif/ERR2_HUMAN.H11MO.0.A
+SRBP1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/SRBP1_HUMAN.H11MO.0.A
+ELK4_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/ELK4_HUMAN.H11MO.0.A
+REST_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/REST_HUMAN.H11MO.0.A
+VEZF1_HUMAN.H11MO.1.C	http://hocomoco.autosome.ru/motif/VEZF1_HUMAN.H11MO.1.C
+NFIB_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/NFIB_HUMAN.H11MO.0.D
+MYF6_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/MYF6_HUMAN.H11MO.0.C
+ITF2_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ITF2_HUMAN.H11MO.0.C
+PAX8_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/PAX8_HUMAN.H11MO.0.D
+SUH_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/SUH_HUMAN.H11MO.0.A
+NR2C2_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/NR2C2_HUMAN.H11MO.0.B
+SCRT1_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/SCRT1_HUMAN.H11MO.0.D
+PATZ1_HUMAN.H11MO.1.C	http://hocomoco.autosome.ru/motif/PATZ1_HUMAN.H11MO.1.C
+HNF4A_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/HNF4A_HUMAN.H11MO.0.A
+ZNF18_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ZNF18_HUMAN.H11MO.0.C
+RARG_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/RARG_HUMAN.H11MO.0.B
+BHE40_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/BHE40_HUMAN.H11MO.0.A
+HAND1_HUMAN.H11MO.1.D	http://hocomoco.autosome.ru/motif/HAND1_HUMAN.H11MO.1.D
+NFIA_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/NFIA_HUMAN.H11MO.0.C
+GABPA_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/GABPA_HUMAN.H11MO.0.A
+CR3L2_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/CR3L2_HUMAN.H11MO.0.D
+ZBT48_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ZBT48_HUMAN.H11MO.0.C
+PPARA_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/PPARA_HUMAN.H11MO.0.B
+GCR_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/GCR_HUMAN.H11MO.1.A
+NR2C1_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/NR2C1_HUMAN.H11MO.0.C
+BHE41_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/BHE41_HUMAN.H11MO.0.D
+NF2L1_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/NF2L1_HUMAN.H11MO.0.C
+MZF1_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/MZF1_HUMAN.H11MO.0.B
+NANOG_HUMAN.H11MO.1.B	http://hocomoco.autosome.ru/motif/NANOG_HUMAN.H11MO.1.B
+ZN335_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/ZN335_HUMAN.H11MO.0.A
+RXRA_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/RXRA_HUMAN.H11MO.0.A
+COT2_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/COT2_HUMAN.H11MO.0.A
+P63_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/P63_HUMAN.H11MO.1.A
+COT1_HUMAN.H11MO.1.C	http://hocomoco.autosome.ru/motif/COT1_HUMAN.H11MO.1.C
+NFE2_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/NFE2_HUMAN.H11MO.0.A
+ELK1_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/ELK1_HUMAN.H11MO.0.B
+NFYC_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/NFYC_HUMAN.H11MO.0.A
+TBR1_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/TBR1_HUMAN.H11MO.0.D
+LHX6_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/LHX6_HUMAN.H11MO.0.D
+VDR_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/VDR_HUMAN.H11MO.0.A
+AP2A_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/AP2A_HUMAN.H11MO.0.A
+KLF8_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/KLF8_HUMAN.H11MO.0.C
+SRBP2_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/SRBP2_HUMAN.H11MO.0.B
+ETV4_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/ETV4_HUMAN.H11MO.0.B
+COT2_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/COT2_HUMAN.H11MO.1.A
+ZN768_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ZN768_HUMAN.H11MO.0.C
+TBX5_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/TBX5_HUMAN.H11MO.0.D
+TF7L1_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/TF7L1_HUMAN.H11MO.0.B
+NR4A3_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/NR4A3_HUMAN.H11MO.0.D
+ESR1_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/ESR1_HUMAN.H11MO.1.A
+MYBA_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/MYBA_HUMAN.H11MO.0.D
+ERG_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/ERG_HUMAN.H11MO.0.A
+SP4_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/SP4_HUMAN.H11MO.1.A
+ZN148_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/ZN148_HUMAN.H11MO.0.D
+TWST1_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/TWST1_HUMAN.H11MO.1.A
+VEZF1_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/VEZF1_HUMAN.H11MO.0.C
+TCF7_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/TCF7_HUMAN.H11MO.0.A
+FEV_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/FEV_HUMAN.H11MO.0.B
+TFE3_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/TFE3_HUMAN.H11MO.0.B
+MYCN_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/MYCN_HUMAN.H11MO.0.A
+NR2F6_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/NR2F6_HUMAN.H11MO.0.D
+PLAG1_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/PLAG1_HUMAN.H11MO.0.D
+ETS1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/ETS1_HUMAN.H11MO.0.A
+ZN134_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ZN134_HUMAN.H11MO.0.C
+GATA5_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/GATA5_HUMAN.H11MO.0.D
+TFE2_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/TFE2_HUMAN.H11MO.0.A
+RXRG_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/RXRG_HUMAN.H11MO.0.B
+ZFX_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/ZFX_HUMAN.H11MO.0.A
+AP2B_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/AP2B_HUMAN.H11MO.0.B
+NR1H4_HUMAN.H11MO.1.B	http://hocomoco.autosome.ru/motif/NR1H4_HUMAN.H11MO.1.B
+FOXO3_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/FOXO3_HUMAN.H11MO.0.B
+ELF2_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ELF2_HUMAN.H11MO.0.C
+ANDR_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/ANDR_HUMAN.H11MO.1.A
+ZN816_HUMAN.H11MO.1.C	http://hocomoco.autosome.ru/motif/ZN816_HUMAN.H11MO.1.C
+ZBT18_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ZBT18_HUMAN.H11MO.0.C
+NR0B1_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/NR0B1_HUMAN.H11MO.0.D
+RARA_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/RARA_HUMAN.H11MO.1.A
+AP2C_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/AP2C_HUMAN.H11MO.0.A
+MXI1_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/MXI1_HUMAN.H11MO.1.A
+ZN816_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ZN816_HUMAN.H11MO.0.C
+ZIC4_HUMAN.H11MO.0.D	http://hocomoco.autosome.ru/motif/ZIC4_HUMAN.H11MO.0.D
+HXB4_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/HXB4_HUMAN.H11MO.0.B
+ISL1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/ISL1_HUMAN.H11MO.0.A
+NR1H3_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/NR1H3_HUMAN.H11MO.0.B
+FOXP2_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/FOXP2_HUMAN.H11MO.0.C
+MAZ_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/MAZ_HUMAN.H11MO.1.A
+MAFK_HUMAN.H11MO.1.A	http://hocomoco.autosome.ru/motif/MAFK_HUMAN.H11MO.1.A
+BMAL1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/BMAL1_HUMAN.H11MO.0.A
+ANDR_HUMAN.H11MO.2.A	http://hocomoco.autosome.ru/motif/ANDR_HUMAN.H11MO.2.A
+NFYB_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/NFYB_HUMAN.H11MO.0.A
+ZSC31_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ZSC31_HUMAN.H11MO.0.C
+NFYA_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/NFYA_HUMAN.H11MO.0.A
+RARG_HUMAN.H11MO.1.B	http://hocomoco.autosome.ru/motif/RARG_HUMAN.H11MO.1.B
+EVI1_HUMAN.H11MO.0.B	http://hocomoco.autosome.ru/motif/EVI1_HUMAN.H11MO.0.B
+RFX5_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/RFX5_HUMAN.H11MO.0.A
+ESR1_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/ESR1_HUMAN.H11MO.0.A
+P63_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/P63_HUMAN.H11MO.0.A
+CTCF_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/CTCF_HUMAN.H11MO.0.A
+THA_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/THA_HUMAN.H11MO.0.C
+ATF3_HUMAN.H11MO.0.A	http://hocomoco.autosome.ru/motif/ATF3_HUMAN.H11MO.0.A
+ZN547_HUMAN.H11MO.0.C	http://hocomoco.autosome.ru/motif/ZN547_HUMAN.H11MO.0.C
