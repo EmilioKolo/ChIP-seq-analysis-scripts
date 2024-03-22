@@ -22,6 +22,16 @@ Entrez.email = 'ekolomenski@gmail.com';
 Entrez.api_key = '9bccbd4949f226a5930868df36c211e8b408'; 
 import biomart 
 
+# Importo analisischip
+path_analisischip_casa = 'C:\\Users\\Admin\\Documents\\Scripts\\Git\\AnalisisSecuenciasChIP\\'; 
+path_analisischip_ib3 = 'C:\\Users\\emili\\Documents\\Archivos nube\\Git\\analisissecuenciaschip\\'; 
+if ib3:
+    path_analisischip_main = path_analisischip_ib3; 
+else:
+    path_analisischip_main = path_analisischip_casa; 
+sys.path.insert(1, path_analisischip_main); 
+#from analisischip.seq import seq_data, seq_handler 
+
 # Graficos
 import matplotlib.pyplot as plt 
 import seaborn as sns 
@@ -34,8 +44,9 @@ mm10 = EnsemblRelease(102, species='mouse');
 
 
 '''
-# FALTA
-
+### FALTA
+# Abrir archivos .bed
+# 
 '''
 
 
@@ -43,7 +54,7 @@ mm10 = EnsemblRelease(102, species='mouse');
 
 # Direcciones de archivos y outputs para ib3 y casa
 path_git_casa = 'C:\\Users\\Admin\\Documents\\Scripts\\Git\\ChIP-seq-analysis-scripts\\v1.0_scripts_simplificados\\'; 
-path_git_ib3 = '\\ChIP-seq-analysis-scripts\\v1.0_scripts_simplificados\\'; ### COMPLETAR
+path_git_ib3 = 'C:\\Users\\emili\\Documents\\Archivos nube\\Git\\ChIP-seq-analysis-scripts\\v1.0_scripts_simplificados\\'; 
 path_fasta_casa = 'D:\\ArchivosDoctorado\\Genomas\\'; 
 path_fasta_ib3 = 'X:\\Genomas\\'; 
 path_output_dump_casa = 'D:\\ArchivosDoctorado\\Output_dump\\'; 
