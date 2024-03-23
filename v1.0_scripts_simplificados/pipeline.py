@@ -84,6 +84,8 @@ path_pwm_mouse = path_git_main + 'PWM_mouse\\';
 # Variables para pipeline
 dist_max_main = 1000000; 
 L_confirmados = ['GCAAGTG', 'GGAAGTG', 'GAAAGTG', 'ATAAGTG', 'GTAAGTG', 'CTAAGTG', 'TCAAGTG', 'TGAAGTG', 'TAAAGTG', 'TTAAGTG']; 
+nom_pssm_nkx25_human = 'NKX25_HUMAN.H11MO.0.B.pcm'; 
+nom_pssm_nkx25_mouse = 'NKX25_MOUSE.H11MO.0.A.pcm'; 
 
 
 
@@ -93,26 +95,29 @@ L_confirmados = ['GCAAGTG', 'GGAAGTG', 'GAAAGTG', 'ATAAGTG', 'GTAAGTG', 'CTAAGTG
 def _main():
     '''Funcion para probar scripts en ejecucion del archivo'''
 
-    pssm_usado = ''; 
-    score_max_pssm = 0; 
-    genoma_usado = hg19; 
-    nom_genoma_usado = 'hg19'; 
-    M_peaks, M_su, M_genes = pipeline_generador('Anderson2018', 'anderson_test', genoma_usado, nom_genoma_usado, pssm_usado, score_max_pssm, 
+    pssm_usado = abrir_pssm(nom_pssm_nkx25_mouse, path_arch=path_pwm_mouse); 
+    score_mult = 0.9; # Multiplicador del score maximo que se usa como cutoff
+    score_cutoff_pssm = pssm_usado.max*score_mult; 
+    genoma_usado = mm9; 
+    nom_genoma_usado = 'mm9'; 
+    M_peaks, M_su, M_genes = pipeline_generador('Dupays2015', 'dupays_full', genoma_usado, nom_genoma_usado, pssm_usado, score_cutoff_pssm, 
                                                 path_bed=path_git_main, path_out=path_out_main, path_fasta=path_fasta_main, dist_max_gen=dist_max_main, 
-                                                L_su=L_confirmados, test_mode=100); 
-    ### FALTA
-    # Armar pruebas de pipeline_generador
+                                                L_su=L_confirmados, test_mode=0); 
+
+    ### Display
+    for i in M_peaks:
+        print(i)
     ###
     return ''
 
 
-def pipeline_generador(nom_bed, nom_out_base, genoma_ensembl, nombre_genoma, pssm, score_max, path_bed='', path_out='', path_fasta='', dist_max_gen=1000000, L_su=[], test_mode=0):
+def pipeline_generador(nom_bed, nom_out_base, genoma_ensembl, nombre_genoma, pssm, score_cutoff, path_bed='', path_out='', path_fasta='', dist_max_gen=1000000, L_su=[], test_mode=0):
     '''Pipeline desde abrir archivos .bed y resultados RNA-seq hasta generar tablas de sitios y genes que se usan por otros scripts.
     genoma_ensembl es el elemento genoma de ensembl, usado para buscar genes cerca de peaks en el archivo .bed.
     dist_max_gen es la distancia maxima a la que se buscan genes cercanos.
     L_su es una lista de secuencias consideradas sitios de union.
     pssm es una matriz de puntaje para secuencias (FORMATO UNIFICADO POR UNA FUNCION)
-    score_max es el score maximo aceptado para una secuencia correcta de pssm (uso 90% del puntaje maximo posible).
+    score_cutoff es el score minimo aceptado para una secuencia correcta de pssm (uso 90% del puntaje maximo posible).
     test_mode define si se hace una prueba con una seleccion de peaks (se hace si es un numero distinto de 0)'''
 
     # Abro archivo .bed
@@ -128,29 +133,32 @@ def pipeline_generador(nom_bed, nom_out_base, genoma_ensembl, nombre_genoma, pss
     M_su = []; 
     # Inicializo la matriz de genes
     M_genes = []; 
+    # Defino largo de M_peaks
+    len_peaks=len(M_peaks)
     # Recorro M_peaks para trabajar sobre cada peak
-    for i in range(len(M_peaks)):
+    for i in range(len_peaks):
         curr_peak = M_peaks[i]; 
         # Reviso que chr_n este en keys de dict_chr_n
         if curr_peak[0] in dict_chr_n.keys():
             # Uso genes_cercanos_peak() para buscar genes cercanos
-            M_genes = M_genes + genes_cercanos_peak(curr_peak[0], curr_peak[1], curr_peak[2], dist_max_gen, genoma_ensembl); 
+            M_genes = M_genes + genes_cercanos_peak(curr_peak[0], int(curr_peak[1]), int(curr_peak[2]), dist_max_gen, genoma_ensembl); 
             # Uso secuencia_peak() para obtener la secuencia
-            seq_peak = secuencia_peak(dict_chr_n[curr_peak[0]], curr_peak[1], curr_peak[2]); 
+            seq_peak = secuencia_peak(dict_chr_n[curr_peak[0]], int(curr_peak[1]), int(curr_peak[2])); 
             # Uso sitios_union_lista() para buscar sitios de union por lista
             M_su = M_su + sitios_union_lista(seq_peak, curr_peak[0], L_su, int(curr_peak[1])-1); 
             # Uso sitios_union_pssm() para buscar sitios de union por pssm
-            M_su = M_su + sitios_union_pssm(seq_peak, curr_peak[0], pssm, score_max, int(curr_peak[1])-1); 
-            ### FALTA
-            # Abrir un archivo e ir guardando seq_peak (para no tener que volver a buscarlas)
-            ###
-    ### FALTA
-    # Recorrer M_su para chequeos (capaz es innecesario)
-    # Guardar L_peaks?? (M_peaks con secuencias?)
-    ###
+            M_su = M_su + sitios_union_pssm(seq_peak, curr_peak[0], pssm, score_cutoff, int(curr_peak[1])-1); 
+        ### Display
+        if ((i+1)%100==0) or i==0:
+            print('Avance: ' + str(i+1) + ' de ' + str(len_peaks))
+        ###
+    M_genes = eliminar_duplicados(M_genes); 
     M_su = guardar_matriz(nom_out_base+'_sitios_union', M_su, path_out=path_out); 
     M_genes = guardar_matriz(nom_out_base+'_genes', M_genes, path_out=path_out); 
     return M_peaks, M_su, M_genes
+
+
+### Funciones principales del pipeline
 
 
 def genes_cercanos_peak(chr_n, pos_ini, pos_end, dist_max, genoma_ensembl):
@@ -180,16 +188,6 @@ def genes_cercanos_peak(chr_n, pos_ini, pos_end, dist_max, genoma_ensembl):
     return M_out
 
 
-def secuencia_peak(record_seq, pos_ini, pos_end):
-    '''Funcion para obtener la secuencia del rango definido por chr_n, pos_ini y pos_end.
-    nombre_genoma esta pensado para funcionar con hg19, hg38, mm9 y mm10. 
-    Devuelve un string con una secuencia de ADN.'''
-
-    # Extraigo la secuencia de record_seq
-    seq_out = record_seq[pos_ini-1:pos_end]; 
-    return seq_out
-
-
 def sitios_union_lista(seq_peak, chr_n, L_sitios, pos_ini_ref):
     '''Funcion para encontrar todas las ocurrencias de cada una de las secuencias en L_sitios dentro de seq_peak.
     Devuelve listas de sitios de union, donde cada sitio incluye chr_n, pos_ini, pos_end, seq y fuente="lista" (ver si agrego algo mas).'''
@@ -210,9 +208,6 @@ def sitios_union_pssm(seq_peak, chr_n, pssm, score_cutoff, pos_ini_ref):
 
     # Inicializo la lista de sitios de union que se devuelve
     L_su = []; 
-    ### FALTA
-    # Ver como se hace en seq.py (funcion _buscar_PSSM_en_seq())
-    ###
     # Defino el largo de la secuencia buscada
     len_pssm = len(pssm.consensus); 
     # Veo que el largo de seq_referencia sea mayor o igual al largo de pssm.consensus
@@ -233,7 +228,7 @@ def sitios_union_pssm(seq_peak, chr_n, pssm, score_cutoff, pos_ini_ref):
                     pos_ini = position+pos_ini_ref; 
                     forward = True; 
                 # Agrego chr_n, pos_ini y pos_end a curr_su
-                curr_su = [chr_n, pos_ini, pos_ini+len_pssm-1, str(seq_encontrada), 'pssm', int(score)]; 
+                curr_su = [chr_n, pos_ini, pos_ini+len_pssm-1, str(seq_encontrada), 'pssm', float(score)]; 
                 # Agrego curr_su a L_su
                 L_su.append(curr_su[:]); 
         except:
@@ -261,7 +256,7 @@ def sitio_union_str(seq_referencia, seq_union, chr_n, pos_ini_ref=0):
             curr_su = [str(chr_n), pos_ini_ref+i+1, pos_ini_ref+i+len(seq_union), str(seq_union), "lista"]; 
         # Si reverso_union es igual a curr_seq, registro pos_ini, pos_end, reverso_union
         elif reverso_union == str(curr_seq).upper():
-            curr_su = [pos_ini_ref+i+1, pos_ini_ref+i+len(seq_union), str(reverso_union)]; 
+            curr_su = [str(chr_n), pos_ini_ref+i+1, pos_ini_ref+i+len(seq_union), str(reverso_union), "lista"]; 
         # Reviso si curr_su esta registrado
         if len(curr_su) > 0:
             # Si se encontro un sitio de union, curr_su tiene largo mayor a 0 y lo registro en L_su
@@ -269,33 +264,14 @@ def sitio_union_str(seq_referencia, seq_union, chr_n, pos_ini_ref=0):
     return L_su
 
 
-def guardar_matriz(nom_out, M_out, path_out='', ext='.csv', sep=';'):
-    '''Funcion para guardar una matriz en un archivo .csv.'''
+### Funciones simples de procesamiento
 
-    # Defino la direccion del archivo con nom_out y path_out
-    if path_out=='':
-        filepath = nom_out + ext; 
-    else:
-        filepath = os.path.join(path_out, nom_out + ext); 
-    # Creo el archivo filepath
-    with open(filepath, 'w') as f_out:
-        print('Archivo ' + nom_out + ext + ' creado.')
-    # Vuelvo a abrirlo en modo append para escribirlo
-    with open(filepath, 'a') as f_out:
-        # Recorro M_out
-        for i in range(len(M_out)):
-            curr_row = M_out[i]; 
-            # Inicializo el string que se escribe a f_out
-            row_str = ''; 
-            # Recorro curr_row
-            for j in range(len(curr_row)):
-                # Agrego str(curr_row[j]) a row_str
-                row_str = str(curr_row[j]) + sep; 
-            # Una vez terminado, elimino la ultima ocurrencia de sep de row_str
-            row_str = row_str.rstrip(sep); 
-            # Agrego end of line y guardo en f_out
-            f_out.write(row_str + '\n'); 
-    return M_out
+
+def chrn_to_contig(chr_n):
+    '''Funcion para pasar de chr_n a contig.
+    Recibe un string de formato "chr"+N, donde N puede ser un numero o letras (X, Y, M).
+    Devuelve un string. con solo N'''
+    return chr_n[3:]
 
 
 def complemento_secuencia(seq):
@@ -323,49 +299,6 @@ def complemento_secuencia(seq):
     return ret_seq
 
 
-def chrn_to_contig(chr_n):
-    '''Funcion para pasar de chr_n a contig.
-    Recibe un string de formato "chr"+N, donde N puede ser un numero o letras (X, Y, M).
-    Devuelve un string. con solo N'''
-    return chr_n[3:]
-
-
-def seqio_chr_n(peaks, nombre_genoma, path_fasta=''):
-    '''Funcion para extraer todos los archivos .fasta de contigs que aparezcan en la matriz de peaks.'''
-
-    # Inicializo el diccionario que se devuelve
-    dict_out = {}; 
-    # Inicializo una lista de chr_n unicos en matriz peaks
-    L_chr_n = []; 
-    # Recorro peaks
-    for i in range(len(peaks)):
-        curr_peak = peaks[i]; 
-        # Defino chr_n como curr_peak[0]
-        curr_chr_n = curr_peak[0]; 
-        # Si curr_chr_n no esta en L_chr_n, lo agrego
-        if not (str(curr_chr_n) in L_chr_n):
-            L_chr_n.append(str(curr_chr_n)); 
-    # Recorro L_chr_n
-    for i in L_chr_n:
-        chr_n = L_chr_n[i]; 
-        # Defino el nombre y direccion del archivo a buscar
-        nom_fasta = nombre_genoma + '_' + chr_n + '.fasta'; 
-        # Defino fulldir_fasta con nom_fasta y path_fasta
-        if path_fasta=='':
-            fulldir_fasta = nom_fasta; 
-        else:
-            fulldir_fasta = os.path.join(path_fasta, nom_fasta); 
-        # Pruebo abrir el archivo
-        try:
-            # Abro el fasta con SeqIO
-            record = SeqIO.read(fulldir_fasta, 'fasta'); 
-            # Agrego record.seq a dict_out
-            dict_out[chr_n] = record.seq; # Asumo que los chr_n en L_chr_n no estan repetidos
-        except:
-            print('ERROR: chr_n ' + str(chr_n) + ' no se pudo abrir. nom_fasta: ' + str(nom_fasta) + ' ; path_fasta: ' + str(path_fasta))
-    return dict_out
-
-
 def definir_pos0(start, end, strand):
     '''Funcion que recibe el start, end y strand de un elemento gen de EnsemblRelease y devuelve el +1.'''
 
@@ -379,6 +312,42 @@ def definir_pos0(start, end, strand):
         print('WARNING: Strand ' + str(strand) + ' no reconocido. Se devuelve start como +1.')
         ret = start; 
     return ret
+
+
+def eliminar_duplicados(l_in, col_index=0):
+    '''Funcion que elimina todos los elementos duplicados de una lista.
+    Busca por col_index y asume que l_in es una lista de listas.'''
+
+    # Inicializo la lista que se devuelve
+    l_out = []; 
+    l_index = []; 
+    len_l_in = len(l_in); 
+    # Recorro l_in
+    for i in range(len_l_in):
+        curr_elem = l_in[i]; 
+        # Veo si curr_elem esta en l_out
+        if not (curr_elem[col_index] in l_index):
+            # Agrego curr_elem a l_out y curr_elem[col_index] a l_index
+            l_out.append(l_in[i]); 
+            l_index.append(curr_elem[col_index]); 
+        ### Display
+        if (i+1)%1000==0 or i==0:
+            print('Progreso: ' + str(i+1) + ' de ' + str(len_l_in))
+        ###
+    return l_out
+
+
+def secuencia_peak(record_seq, pos_ini, pos_end):
+    '''Funcion para obtener la secuencia del rango definido por chr_n, pos_ini y pos_end.
+    nombre_genoma esta pensado para funcionar con hg19, hg38, mm9 y mm10. 
+    Devuelve un string con una secuencia de ADN.'''
+
+    # Extraigo la secuencia de record_seq
+    seq_out = record_seq[pos_ini-1:pos_end]; 
+    return seq_out
+
+
+### Funciones para abrir y guardar archivos
 
 
 def abrir_bed(nom_arch, path_arch='', sep='\t', ext='.bed', col_num=3):
@@ -402,6 +371,113 @@ def abrir_bed(nom_arch, path_arch='', sep='\t', ext='.bed', col_num=3):
             # Cargo L_line en M_out
             M_out.append(L_line[:col_num]); 
     return M_out
+
+
+def abrir_pssm(nom_arch, path_arch='', solo_pssm=True, pseudocounts=0.5):
+    '''Funcion para abrir una matriz de pesos para un sitio de union.'''
+
+    # Defino dir_arch
+    if path_arch == '':
+        dir_arch = str(nom_arch); 
+    else:
+        dir_arch = os.path.join(path_arch, nom_arch); 
+    # Abro pcm con motifs.parse
+    handle = open(dir_arch); 
+    record = motifs.parse(handle, 'pfm-four-columns'); 
+    handle.close(); 
+    # Veo que record tenga un solo motif
+    if len(record) == 1:
+        m = record[0]; 
+    # Si tiene mas de un motif, tiro error, hago print a todos los motif y agarro el primero
+    elif len(record) > 1:
+        print('WARNING: ' + nom_arch + ' tiene ' + str(len(record)) + ' motifs. Se devuelve solo el primero.')
+        m = record[0]; 
+        print('Motifs en record:')
+        for i in record:
+            print(i.name)
+            print(i.counts)
+    # Si no hay ningun motif, tiro error y dejo m como string vacio
+    else:
+        print('ERROR: No se encontro ningun motif en ' + nom_arch + '. Se devuelve string vacio.')
+        m = ''; 
+    # Reviso que m no sea lista vacia y genero pwm y pssm
+    if m != '':
+        pwm = m.counts.normalize(pseudocounts=pseudocounts); 
+        pssm = pwm.log_odds(); 
+    else:
+        pwm = ''; 
+        pssm = ''; 
+    # Devuelvo solo pssm por default
+    if solo_pssm:
+        return pssm
+    # Si solo_pssm==False, devuelvo m y pwm tambien
+    else:
+        return m, pwm, pssm
+
+
+def guardar_matriz(nom_out, M_out, path_out='', ext='.csv', sep=';'):
+    '''Funcion para guardar una matriz en un archivo .csv.'''
+
+    # Defino la direccion del archivo con nom_out y path_out
+    if path_out=='':
+        filepath = nom_out + ext; 
+    else:
+        filepath = os.path.join(path_out, nom_out + ext); 
+    # Creo el archivo filepath
+    with open(filepath, 'w') as f_out:
+        print('Archivo ' + nom_out + ext + ' creado.')
+    # Vuelvo a abrirlo en modo append para escribirlo
+    with open(filepath, 'a') as f_out:
+        # Recorro M_out
+        for i in range(len(M_out)):
+            curr_row = M_out[i]; 
+            # Inicializo el string que se escribe a f_out
+            row_str = ''; 
+            # Recorro curr_row
+            for j in range(len(curr_row)):
+                # Agrego str(curr_row[j]) a row_str
+                row_str = row_str + str(curr_row[j]) + sep; 
+            # Una vez terminado, elimino la ultima ocurrencia de sep de row_str
+            row_str = row_str.rstrip(sep); 
+            # Agrego end of line y guardo en f_out
+            f_out.write(row_str + '\n'); 
+    return M_out
+
+
+def seqio_chr_n(peaks, nombre_genoma, path_fasta=''):
+    '''Funcion para extraer todos los archivos .fasta de contigs que aparezcan en la matriz de peaks.'''
+
+    # Inicializo el diccionario que se devuelve
+    dict_out = {}; 
+    # Inicializo una lista de chr_n unicos en matriz peaks
+    L_chr_n = []; 
+    # Recorro peaks
+    for i in range(len(peaks)):
+        curr_peak = peaks[i]; 
+        # Defino chr_n como curr_peak[0]
+        curr_chr_n = curr_peak[0]; 
+        # Si curr_chr_n no esta en L_chr_n, lo agrego
+        if not (str(curr_chr_n) in L_chr_n):
+            L_chr_n.append(str(curr_chr_n)); 
+    # Recorro L_chr_n
+    for i in range(len(L_chr_n)):
+        chr_n = L_chr_n[i]; 
+        # Defino el nombre y direccion del archivo a buscar
+        nom_fasta = nombre_genoma + '_' + chr_n + '.fasta'; 
+        # Defino fulldir_fasta con nom_fasta y path_fasta
+        if path_fasta=='':
+            fulldir_fasta = nom_fasta; 
+        else:
+            fulldir_fasta = os.path.join(path_fasta, nom_fasta); 
+        # Pruebo abrir el archivo
+        try:
+            # Abro el fasta con SeqIO
+            record = SeqIO.read(fulldir_fasta, 'fasta'); 
+            # Agrego record.seq a dict_out
+            dict_out[chr_n] = record.seq; # Asumo que los chr_n en L_chr_n no estan repetidos
+        except:
+            print('ERROR: chr_n ' + str(chr_n) + ' no se pudo abrir. nom_fasta: ' + str(nom_fasta) + ' ; path_fasta: ' + str(path_fasta))
+    return dict_out
 
 
 #################################### RESULTADOS ###################################
