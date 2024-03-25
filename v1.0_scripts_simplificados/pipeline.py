@@ -45,12 +45,9 @@ mm10 = EnsemblRelease(102, species='mouse');
 
 '''
 ### FALTA
-# Abrir archivos .bed
-# Pasar a formato usado en .csv
-    # chr_n, contig, pos_ini, pos_end
-    # Sitios de union encontrados (por secuencia y por matriz)
-        # Genes cercanos
-        # Sitios de union otros TF cercanos
+# Agregar info de genes cercanos a peaks y sitios de union
+# Abrir resultados RNAseq
+# Seleccionar genes RNAseq
 '''
 
 
