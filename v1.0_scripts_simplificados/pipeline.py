@@ -45,7 +45,7 @@ mm10 = EnsemblRelease(102, species='mouse');
 
 '''
 ### FALTA
-# Agregar info de genes cercanos a peaks y sitios de union
+# X Agregar info de genes cercanos a peaks y sitios de union
 # Abrir resultados RNAseq
 # Seleccionar genes RNAseq
 '''
@@ -83,6 +83,8 @@ dist_max_main = 1000000;
 L_confirmados = ['GCAAGTG', 'GGAAGTG', 'GAAAGTG', 'ATAAGTG', 'GTAAGTG', 'CTAAGTG', 'TCAAGTG', 'TGAAGTG', 'TAAAGTG', 'TTAAGTG']; 
 nom_pssm_nkx25_human = 'NKX25_HUMAN.H11MO.0.B.pcm'; 
 nom_pssm_nkx25_mouse = 'NKX25_MOUSE.H11MO.0.A.pcm'; 
+score_mult = 0.9; # Multiplicador del score maximo de pssm que se usa como cutoff
+organism = 'human'; # human o mouse
 
 
 
@@ -92,18 +94,30 @@ nom_pssm_nkx25_mouse = 'NKX25_MOUSE.H11MO.0.A.pcm';
 def _main():
     '''Funcion para probar scripts en ejecucion del archivo'''
 
-    pssm_usado = abrir_pssm(nom_pssm_nkx25_mouse, path_arch=path_pwm_mouse); 
-    score_mult = 0.9; # Multiplicador del score maximo que se usa como cutoff
+    if organism.lower()=='human' or organism.lower()=='humano':
+        pssm_usado = abrir_pssm(nom_pssm_nkx25_human, path_arch=path_pwm_human); 
+        genoma_usado = hg19; 
+        nom_genoma_usado = 'hg19'; 
+        nom_bed_usado = 'Anderson2018'; 
+        nom_output = 'anderson_full'; 
+    elif organism.lower()=='mouse' or organism.lower()=='raton':
+        pssm_usado = abrir_pssm(nom_pssm_nkx25_mouse, path_arch=path_pwm_mouse); 
+        genoma_usado = mm9; 
+        nom_genoma_usado = 'mm9'; 
+        nom_bed_usado = 'Dupays2015'; 
+        nom_output = 'dupays_full'; 
+    else:
+        print('Organismo ' + str(organism) + ' no reconocido.')
+        return ''
     score_cutoff_pssm = pssm_usado.max*score_mult; 
-    genoma_usado = mm9; 
-    nom_genoma_usado = 'mm9'; 
-    M_peaks, M_su, M_genes = pipeline_generador('Dupays2015', 'dupays_full', genoma_usado, nom_genoma_usado, pssm_usado, score_cutoff_pssm, 
+    
+    M_peaks, M_su, M_genes = pipeline_generador(nom_bed_usado, nom_output, genoma_usado, nom_genoma_usado, pssm_usado, score_cutoff_pssm, 
                                                 path_bed=path_git_main, path_out=path_out_main, path_fasta=path_fasta_main, dist_max_gen=dist_max_main, 
                                                 L_su=L_confirmados, test_mode=0); 
 
     ### Display
-    for i in M_peaks:
-        print(i)
+    #for i in M_peaks:
+    #    print(i)
     ###
     return ''
 
@@ -138,20 +152,37 @@ def pipeline_generador(nom_bed, nom_out_base, genoma_ensembl, nombre_genoma, pss
         # Reviso que chr_n este en keys de dict_chr_n
         if curr_peak[0] in dict_chr_n.keys():
             # Uso genes_cercanos_peak() para buscar genes cercanos
-            M_genes = M_genes + genes_cercanos_peak(curr_peak[0], int(curr_peak[1]), int(curr_peak[2]), dist_max_gen, genoma_ensembl); 
+            M_genes_cerca = genes_cercanos_peak(curr_peak[0], int(curr_peak[1]), int(curr_peak[2]), dist_max_gen, genoma_ensembl); 
             # Uso secuencia_peak() para obtener la secuencia
             seq_peak = secuencia_peak(dict_chr_n[curr_peak[0]], int(curr_peak[1]), int(curr_peak[2])); 
             # Uso sitios_union_lista() para buscar sitios de union por lista
-            M_su = M_su + sitios_union_lista(seq_peak, curr_peak[0], L_su, int(curr_peak[1])-1); 
+            M_su_lista = sitios_union_lista(seq_peak, curr_peak[0], L_su, int(curr_peak[1])-1); 
             # Uso sitios_union_pssm() para buscar sitios de union por pssm
-            M_su = M_su + sitios_union_pssm(seq_peak, curr_peak[0], pssm, score_cutoff, int(curr_peak[1])-1); 
+            M_su_pssm = sitios_union_pssm(seq_peak, curr_peak[0], pssm, score_cutoff, int(curr_peak[1])-1); 
+            # Agrego info de genes cercanos y sitios de union a M_peaks
+            M_peaks[i].append(str(len(M_genes_cerca))); 
+            M_peaks[i].append(str(len(M_su_lista)+len(M_su_pssm))); 
+            M_peaks[i].append(str(len(M_su_lista))); 
+            M_peaks[i].append(str(len(M_su_pssm))); 
+            # Agrego M_genes_cerca a M_genes
+            M_genes = M_genes + M_genes_cerca; 
+            # Agrego M_su_lista a M_su
+            M_su = M_su + M_su_lista; 
+            # Agrego M_su_pssm a M_su
+            M_su = M_su + M_su_pssm
         ### Display
         if ((i+1)%100==0) or i==0:
             print('Avance: ' + str(i+1) + ' de ' + str(len_peaks))
         ###
+    ### FALTA
+    # X Agregar info de genes cercanos a peaks y sitios de union
+    # Abrir resultados RNAseq
+    # Seleccionar genes RNAseq
+    ###
     M_genes = eliminar_duplicados(M_genes); 
-    M_su = guardar_matriz(nom_out_base+'_sitios_union', M_su, path_out=path_out); 
-    M_genes = guardar_matriz(nom_out_base+'_genes', M_genes, path_out=path_out); 
+    M_su = guardar_matriz(nom_out_base+'_sitios_union', M_su, path_out=path_out, l_head=['chr_n', 'pos_ini', 'pos_end', 'seq', 'source', 'score_pssm']); 
+    M_genes = guardar_matriz(nom_out_base+'_genes', M_genes, path_out=path_out, l_head=['gene_id', 'chr_n', 'pos0', 'biotype']); 
+    M_peaks = guardar_matriz(nom_out_base+'_peaks', M_peaks, path_out=path_out, l_head=['chr_n', 'pos_ini', 'pos_end', 'n_genes', 'n_su', 'n_su_lista', 'n_su_pssm']); 
     return M_peaks, M_su, M_genes
 
 
@@ -180,8 +211,10 @@ def genes_cercanos_peak(chr_n, pos_ini, pos_end, dist_max, genoma_ensembl):
         L_gen.append(chr_n); # chr_n para tenerlo en formato igual que el resto de scripts
         L_gen.append(pos0); # pos0 determina el +1 del gen
         L_gen.append(curr_gen.biotype); # Me importan mas los protein_coding que el resto
-        # Cargo L_gen a M_out
-        M_out.append(L_gen[:]); 
+        # Solo agrego los protein_coding (Puesto aca para que sea facil modificarlo)
+        if curr_gen.biotype=='protein_coding':
+            # Cargo L_gen a M_out
+            M_out.append(L_gen[:]); 
     return M_out
 
 
@@ -412,7 +445,7 @@ def abrir_pssm(nom_arch, path_arch='', solo_pssm=True, pseudocounts=0.5):
         return m, pwm, pssm
 
 
-def guardar_matriz(nom_out, M_out, path_out='', ext='.csv', sep=';'):
+def guardar_matriz(nom_out, M_out, path_out='', ext='.csv', sep=';', l_head=[]):
     '''Funcion para guardar una matriz en un archivo .csv.'''
 
     # Defino la direccion del archivo con nom_out y path_out
@@ -425,6 +458,18 @@ def guardar_matriz(nom_out, M_out, path_out='', ext='.csv', sep=';'):
         print('Archivo ' + nom_out + ext + ' creado.')
     # Vuelvo a abrirlo en modo append para escribirlo
     with open(filepath, 'a') as f_out:
+        # Si l_head tiene elementos, los uso de titulos para la tabla
+        if len(l_head)>0:
+            # Inicializo el string que se escribe a f_out
+            row_str = ''; 
+            # Recorro l_head
+            for k in range(len(l_head)):
+                # Agrego str(l_head[k]) a row_str
+                row_str = row_str + str(l_head[k]) + sep; 
+            # Una vez terminado, elimino la ultima ocurrencia de sep de row_str
+            row_str = row_str.rstrip(sep); 
+            # Agrego end of line y guardo en f_out
+            f_out.write(row_str + '\n'); 
         # Recorro M_out
         for i in range(len(M_out)):
             curr_row = M_out[i]; 
