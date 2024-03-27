@@ -186,6 +186,10 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
             M_peaks[i].append(str(len(M_su_lista)+len(M_su_pssm))); 
             M_peaks[i].append(str(len(M_su_lista))); 
             M_peaks[i].append(str(len(M_su_pssm))); 
+            ### FALTA
+            # Agregar info de genes up/down regulados a M_genes (1 columna: fold_change)
+            # Agregar info de genes up/down regulados a M_su y M_peaks (3 columnas: n_genes_total, n_genes_up y n_genes_down)
+            ###
             # Agrego M_genes_cerca a M_genes
             M_genes = M_genes + M_genes_cerca; 
             # Agrego M_su_lista a M_su
@@ -196,14 +200,6 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
         if ((i+1)%100==0) or i==0:
             print('Avance: ' + str(i+1) + ' de ' + str(len_peaks))
         ###
-    ### FALTA
-    # X Agregar info de genes cercanos a peaks y sitios de union
-    # X Abrir resultados RNAseq
-    # Seleccionar genes RNAseq
-        # X Pasar IDs a Ensembl
-        # X Probar con genome.genes_by_name(gene_name)
-        # Ver en 9-ClasificacionPeaks3.py, 8-TraduccionRatonHumano.py, 8-ConteoGenesDupaysRNAseq.py y 7-ClasificacionPeaks2.py
-    ###
     M_genes = eliminar_duplicados(M_genes); 
     M_su = guardar_matriz(nom_out_base+'_sitios_union', M_su, path_out=path_out, l_head=['chr_n', 'pos_ini', 'pos_end', 'seq', 'source', 'score_pssm']); 
     M_genes = guardar_matriz(nom_out_base+'_genes', M_genes, path_out=path_out, l_head=['gene_id', 'chr_n', 'pos0', 'biotype']); 
