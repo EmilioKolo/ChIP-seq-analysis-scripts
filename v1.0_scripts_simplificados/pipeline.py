@@ -46,8 +46,12 @@ mm10 = EnsemblRelease(102, species='mouse');
 '''
 ### FALTA
 # X Agregar info de genes cercanos a peaks y sitios de union
-# Abrir resultados RNAseq
+# X Abrir resultados RNAseq
 # Seleccionar genes RNAseq
+    # Ver desde scripts 10- para atras
+# Generar secuencias para MEME-ChIP
+# Agregar cosas relacionadas a estudiar varios factores de transcripcion
+###
 '''
 
 
@@ -99,21 +103,27 @@ def _main():
         genoma_usado = hg19; 
         nom_genoma_usado = 'hg19'; 
         nom_bed_usado = 'Anderson2018'; 
+        nom_rnaseq_usado = 'Anderson2018_RNAseq'; 
+        id_col_usado = 0; 
+        updown_col_usado = 4; 
         nom_output = 'anderson_full'; 
     elif organism.lower()=='mouse' or organism.lower()=='raton':
         pssm_usado = abrir_pssm(nom_pssm_nkx25_mouse, path_arch=path_pwm_mouse); 
         genoma_usado = mm9; 
         nom_genoma_usado = 'mm9'; 
         nom_bed_usado = 'Dupays2015'; 
+        nom_rnaseq_usado = 'Dupays2015_RNAseq'; 
+        id_col_usado = 4; 
+        updown_col_usado = 6; 
         nom_output = 'dupays_full'; 
     else:
         print('Organismo ' + str(organism) + ' no reconocido.')
         return ''
     score_cutoff_pssm = pssm_usado.max*score_mult; 
     
-    M_peaks, M_su, M_genes = pipeline_generador(nom_bed_usado, nom_output, genoma_usado, nom_genoma_usado, pssm_usado, score_cutoff_pssm, 
+    M_peaks, M_su, M_genes = pipeline_generador(nom_bed_usado, nom_rnaseq_usado, nom_output, genoma_usado, nom_genoma_usado, pssm_usado, score_cutoff_pssm, 
                                                 path_bed=path_git_main, path_out=path_out_main, path_fasta=path_fasta_main, dist_max_gen=dist_max_main, 
-                                                L_su=L_confirmados, test_mode=0); 
+                                                L_su=L_confirmados, test_mode=0, id_col_rnaseq=id_col_usado, updown_col_rnaseq=updown_col_usado); 
 
     ### Display
     #for i in M_peaks:
@@ -122,7 +132,8 @@ def _main():
     return ''
 
 
-def pipeline_generador(nom_bed, nom_out_base, genoma_ensembl, nombre_genoma, pssm, score_cutoff, path_bed='', path_out='', path_fasta='', dist_max_gen=1000000, L_su=[], test_mode=0):
+def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre_genoma, pssm, score_cutoff, path_bed='', path_out='', path_fasta='', dist_max_gen=1000000, L_su=[], 
+                       id_col_rnaseq=0, updown_col_rnaseq=1, test_mode=0):
     '''Pipeline desde abrir archivos .bed y resultados RNA-seq hasta generar tablas de sitios y genes que se usan por otros scripts.
     genoma_ensembl es el elemento genoma de ensembl, usado para buscar genes cerca de peaks en el archivo .bed.
     dist_max_gen es la distancia maxima a la que se buscan genes cercanos.
@@ -174,10 +185,13 @@ def pipeline_generador(nom_bed, nom_out_base, genoma_ensembl, nombre_genoma, pss
         if ((i+1)%100==0) or i==0:
             print('Avance: ' + str(i+1) + ' de ' + str(len_peaks))
         ###
+    # Abro los resultados de RNA-seq
+    M_rnaseq = abrir_rnaseq(nom_rnaseq, path_arch=path_bed, sep=';', ext='.csv', id_col=id_col_rnaseq, updown_col=updown_col_rnaseq); 
     ### FALTA
     # X Agregar info de genes cercanos a peaks y sitios de union
-    # Abrir resultados RNAseq
+    # X Abrir resultados RNAseq
     # Seleccionar genes RNAseq
+        # Pasar IDs a Ensembl
     ###
     M_genes = eliminar_duplicados(M_genes); 
     M_su = guardar_matriz(nom_out_base+'_sitios_union', M_su, path_out=path_out, l_head=['chr_n', 'pos_ini', 'pos_end', 'seq', 'source', 'score_pssm']); 
@@ -443,6 +457,35 @@ def abrir_pssm(nom_arch, path_arch='', solo_pssm=True, pseudocounts=0.5):
     # Si solo_pssm==False, devuelvo m y pwm tambien
     else:
         return m, pwm, pssm
+
+
+def abrir_rnaseq(nom_arch, path_arch='', sep='\t', ext='.csv', id_col=0, updown_col=1):
+    '''Funcion que abre archivos con output de estudios de RNA-seq y devuelve listas de genes con numeros de up- o downregulacion.
+    id_col determina la columna del identificador del gen.
+    updown_col determina la columna del numero correspondiente a up- o downregulacion.'''
+
+    # Inicializo la matriz que se devuelve
+    M_out = []; 
+    # Defino la direccion del archivo con nom_arch y path_arch
+    if path_arch=='':
+        filepath = nom_arch + ext; 
+    else:
+        filepath = os.path.join(path_arch, nom_arch + ext); 
+    # Abro el archivo filepath
+    with open(filepath, 'r') as f_out:
+        print('Archivo ' + nom_arch + ' abierto.')
+        # Recorro cada fila
+        for curr_line in f_out.readlines():
+            # Transformo la linea en lista
+            l_line = curr_line.rstrip().split(sep=sep); 
+            # Inicializo una lista de valores que se devuelven
+            l_out = []; 
+            # Agrego los valores importantes a devolver a l_out
+            l_out.append(str(l_line[id_col])); 
+            l_out.append(float(l_line[updown_col])); 
+            # Cargo l_line en M_out
+            M_out.append(l_line[:]); 
+    return M_out
 
 
 def guardar_matriz(nom_out, M_out, path_out='', ext='.csv', sep=';', l_head=[]):
