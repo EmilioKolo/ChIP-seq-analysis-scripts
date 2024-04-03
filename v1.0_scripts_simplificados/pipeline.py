@@ -1,5 +1,5 @@
 
-ib3 = True; 
+ib3 = False; 
 http_proxy_ib3 = 'http://proxy.fcen.uba.ar:8080'; 
 https_proxy_ib3 = 'https://proxy.fcen.uba.ar:8080'; 
 ftp_proxy_ib3 = 'ftp://proxy.fcen.uba.ar:8080'; 
@@ -47,12 +47,12 @@ mm10 = EnsemblRelease(102, species='mouse');
 ### FALTA
 # X Agregar info de genes cercanos a peaks y sitios de union
 # X Abrir resultados RNAseq
-# Seleccionar genes RNAseq
+# X Seleccionar genes RNAseq
     # * Ver en 9-ClasificacionPeaks3.py, 8-TraduccionRatonHumano.py, 8-ConteoGenesDupaysRNAseq.py y 7-ClasificacionPeaks2.py
     # X Extraer genes RNAseq
     # X Pasarlos a ID de Ensembl
-    # Seleccionar genes en M_genes por lista RNAseq y agregar columna
-    # Agregar info de updown a M_genes
+    # X Seleccionar genes en M_genes por lista RNAseq y agregar columna
+    # X Agregar info de updown a M_genes
 # Generar secuencias para MEME-ChIP
     # Ver 4-GeneracionFastaMEME.py en Scripts_0_16
 # Agregar cosas relacionadas a estudiar varios factores de transcripcion
@@ -111,7 +111,7 @@ def _main():
         nom_bed_usado = 'Anderson2018'; 
         nom_rnaseq_usado = 'Anderson2018_RNAseq_source'; 
         id_col_usado = 1; 
-        updown_col_usado = 3; 
+        updown_col_usado = 3; # Columna log(fold change)
         l_translate = [0, hg19]; 
         nom_output = 'anderson_full'; 
     elif organism.lower()=='mouse' or organism.lower()=='raton':
@@ -121,7 +121,7 @@ def _main():
         nom_bed_usado = 'Dupays2015'; 
         nom_rnaseq_usado = 'Dupays2015_RNAseq_source'; 
         id_col_usado = 12; 
-        updown_col_usado = 1; 
+        updown_col_usado = 2; # Columna log(fold change)
         l_translate = []; 
         nom_output = 'dupays_full'; 
     else:
@@ -133,10 +133,6 @@ def _main():
                                                 path_bed=path_git_main, path_out=path_out_main, path_fasta=path_fasta_main, dist_max_gen=dist_max_main, 
                                                 L_su=L_confirmados, test_mode=test_used, id_col_rnaseq=id_col_usado, updown_col_rnaseq=updown_col_usado, l_translate=l_translate); 
 
-    ### Display
-    #for i in M_peaks:
-    #    print(i)
-    ###
     return ''
 
 
@@ -154,7 +150,7 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
     # Abro archivo .bed
     M_peaks = abrir_bed(nom_bed, path_arch=path_bed); 
     # Abro los resultados de RNA-seq
-    M_rnaseq = abrir_rnaseq(nom_rnaseq, path_arch=path_bed, sep=';', ext='.csv', id_col=id_col_rnaseq, updown_col=updown_col_rnaseq, traducir=l_translate); 
+    dict_rnaseq = abrir_rnaseq(nom_rnaseq, path_arch=path_bed, sep=';', ext='.csv', id_col=id_col_rnaseq, updown_col=updown_col_rnaseq, traducir=l_translate); 
     # Obtengo la secuencia de todos los archivos fasta del genoma con elementos SeqIO
     dict_chr_n = seqio_chr_n(M_peaks, nombre_genoma, path_fasta); 
     ### Reviso si hago test
@@ -175,21 +171,35 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
         if curr_peak[0] in dict_chr_n.keys():
             # Uso genes_cercanos_peak() para buscar genes cercanos
             M_genes_cerca = genes_cercanos_peak(curr_peak[0], int(curr_peak[1]), int(curr_peak[2]), dist_max_gen, genoma_ensembl); 
+            # Agrego info de genes up/down regulados a M_genes_cerca y extraigo info para M_peaks y M_su
+            M_genes_cerca, n_genes_total, n_genes_up, n_genes_down = agregar_info_rnaseq(M_genes_cerca, dict_rnaseq); 
             # Uso secuencia_peak() para obtener la secuencia
             seq_peak = secuencia_peak(dict_chr_n[curr_peak[0]], int(curr_peak[1]), int(curr_peak[2])); 
             # Uso sitios_union_lista() para buscar sitios de union por lista
             M_su_lista = sitios_union_lista(seq_peak, curr_peak[0], L_su, int(curr_peak[1])-1); 
             # Uso sitios_union_pssm() para buscar sitios de union por pssm
             M_su_pssm = sitios_union_pssm(seq_peak, curr_peak[0], pssm, score_cutoff, int(curr_peak[1])-1); 
+            # Recorro M_su_lista y M_su_pssm para agregar info de genes up/down regulados
+            for j in range(len(M_su_lista)):
+                M_su_lista[j].append(len(M_genes_cerca)); 
+                M_su_lista[j].append(int(n_genes_total)); 
+                M_su_lista[j].append(int(n_genes_up)); 
+                M_su_lista[j].append(int(n_genes_down)); 
+            for j in range(len(M_su_pssm)):
+                M_su_pssm[j].append(len(M_genes_cerca)); 
+                M_su_pssm[j].append(int(n_genes_total)); 
+                M_su_pssm[j].append(int(n_genes_up)); 
+                M_su_pssm[j].append(int(n_genes_down)); 
             # Agrego info de genes cercanos y sitios de union a M_peaks
             M_peaks[i].append(str(len(M_genes_cerca))); 
             M_peaks[i].append(str(len(M_su_lista)+len(M_su_pssm))); 
             M_peaks[i].append(str(len(M_su_lista))); 
             M_peaks[i].append(str(len(M_su_pssm))); 
-            ### FALTA
-            # Agregar info de genes up/down regulados a M_genes (1 columna: fold_change)
-            # Agregar info de genes up/down regulados a M_su y M_peaks (3 columnas: n_genes_total, n_genes_up y n_genes_down)
-            ###
+            M_peaks[i].append(len(M_genes_cerca)); 
+            # Agrego info de genes up/down regulados a M_peaks
+            M_peaks[i].append(int(n_genes_total)); 
+            M_peaks[i].append(int(n_genes_up)); 
+            M_peaks[i].append(int(n_genes_down)); 
             # Agrego M_genes_cerca a M_genes
             M_genes = M_genes + M_genes_cerca; 
             # Agrego M_su_lista a M_su
@@ -202,9 +212,23 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
         ###
     M_genes = eliminar_duplicados(M_genes); 
     M_su = guardar_matriz(nom_out_base+'_sitios_union', M_su, path_out=path_out, l_head=['chr_n', 'pos_ini', 'pos_end', 'seq', 'source', 'score_pssm']); 
-    M_genes = guardar_matriz(nom_out_base+'_genes', M_genes, path_out=path_out, l_head=['gene_id', 'chr_n', 'pos0', 'biotype']); 
-    M_peaks = guardar_matriz(nom_out_base+'_peaks', M_peaks, path_out=path_out, l_head=['chr_n', 'pos_ini', 'pos_end', 'n_genes', 'n_su', 'n_su_lista', 'n_su_pssm']); 
+    M_genes = guardar_matriz(nom_out_base+'_genes', M_genes, path_out=path_out, l_head=['gene_id', 'chr_n', 'pos0', 'biotype', 'fold_change']); 
+    M_peaks = guardar_matriz(nom_out_base+'_peaks', M_peaks, path_out=path_out, 
+                             l_head=['chr_n', 'pos_ini', 'pos_end', 'n_genes', 'n_su', 'n_su_lista', 'n_su_pssm', 'n_genes_cerca', 'n_updown_total', 'n_upreg', 'n_downreg']); 
     return M_peaks, M_su, M_genes
+
+
+def pipeline_meme_chip():
+    '''Genera un archivo .fasta con las secuencias de picos de ChIP-seq para ser mandados a MEME-ChIP.
+    Se seleccionan picos de acuerdo a distintos criterios.'''
+    ### FALTA
+    # Abrir archivos de output_git (peaks o sitios de union?)
+    # Seleccionar sitios/peaks
+    # Unificar largos (ver en scripts)
+    # Obtener secuencias (ver en scripts)
+    # Guardar en archivo .fasta (ver en scripts)
+    ###
+    pass
 
 
 ### Funciones principales del pipeline
@@ -316,6 +340,48 @@ def sitio_union_str(seq_referencia, seq_union, chr_n, pos_ini_ref=0):
 
 
 ### Funciones simples de procesamiento
+
+
+def agregar_info_rnaseq(M_genes, dict_rnaseq):
+    '''Revisar que genes de M_genes estan en dict_rnaseq.
+    dict_rnaseq es un diccionario de genes con ensembl_id como keys y float(fold_change) como valores
+    M_genes es una lista de genes en formato [ensembl_id, chr_n, pos0, biotype]
+    Se agrega, al final de cada gen, una columna con fold_change (0 si no esta en dict_rnaseq)
+    Tambien devuelve n_genes_total (up- y downregulados), n_genes_up, n_genes_down'''
+
+    # Inicializo valores que se devuelven
+    n_genes_total = 0; 
+    n_genes_up = 0; 
+    n_genes_down = 0; 
+    # Inicializo matriz que se devuelve
+    M_out = []; 
+    # Inicializo una lista de genes RNA-seq en base
+    # Recorro M_genes
+    for i in range(len(M_genes)):
+        curr_gen = M_genes[i]; 
+        # Defino curr_gen_name
+        curr_gen_name = curr_gen[0]; 
+        # Inicializo la lista que se agrega a M_out
+        l_out = curr_gen[:]; 
+        # Veo si curr_gen_name esta en dict_rnaseq.keys()
+        if curr_gen_name in dict_rnaseq.keys():
+            updown = dict_rnaseq[curr_gen_name]; 
+            # Si esta, agrego info de fold_change a l_out
+            l_out.append(updown*1); 
+            # Agrego 1 a n_genes_total
+            n_genes_total+=1; 
+            # Veo si hay que agregar +1 a up o down
+            if updown>0:
+                n_genes_up+=1; 
+            elif updown<0:
+                n_genes_down+=1; 
+            else:
+                print('WARNING: Gen ' + str(curr_gen_name) + ' con fold change=0')
+        else:
+            # Si el gen no esta en dict_rnaseq, agrego string vacio a l_out
+            l_out.append(''); 
+        M_out.append(l_out[:]); 
+    return M_out, n_genes_total, n_genes_up, n_genes_down
 
 
 def chrn_to_contig(chr_n):
@@ -469,11 +535,12 @@ def abrir_rnaseq(nom_arch, path_arch='', sep='\t', ext='.csv', id_col=0, updown_
     '''Funcion que abre archivos con output de estudios de RNA-seq y devuelve listas de genes con numeros de up- o downregulacion.
     id_col determina la columna del identificador del gen.
     updown_col determina la columna del numero correspondiente a up- o downregulacion.
+        Se asume que contiene log(fold change) y que se obtiene el fold change con signo(updown)*2^(abs(updown))
     traducir se usa para traducir nombres de genes extraidos de archivo nom_rnaseq. Si es una lista o string vacio, no se traduce. 
     Si traducir tiene elementos, tiene que tener el numero de la columna con el nombre del gen y genoma usado para confirmar Ensembl ID (col_gene_name, genoma).'''
 
     # Inicializo la matriz que se devuelve
-    M_out = []; 
+    dict_out = {}; 
     # Inicializo booleano skip_header
     skip_header = header; 
     # Defino la direccion del archivo con nom_arch y path_arch
@@ -497,60 +564,84 @@ def abrir_rnaseq(nom_arch, path_arch='', sep='\t', ext='.csv', id_col=0, updown_
             else:
                 # Transformo la linea en lista
                 l_line = curr_line.rstrip().split(sep=sep); 
-                # Veo si traducir contiene elementos, si no contiene, guardo ids normalmente
-                if len(traducir)==0:
-                    # Inicializo una lista de valores que se devuelven
-                    l_out = []; 
-                    # Veo que l_line[id_col] tenga algo
-                    if str(l_line[id_col]) != '':
-                        # Agrego los valores importantes a devolver a l_out
-                        l_out.append(str(l_line[id_col])); 
-                        l_out.append(float(l_line[updown_col])); 
-                        # Cargo l_line en M_out
-                        M_out.append(l_line[:]); 
+                # Defino id y updown
+                main_id_raw = str(l_line[id_col]); 
+                try:
+                    fc_abs = fc_from_log_fc(float(l_line[updown_col])); 
+                except:
+                    print('ERROR con fc_abs')
+                    print(l_line)
+                # Separo main_id por '|'
+                for main_id in main_id_raw.split('|'):
+                    # Veo si traducir contiene elementos, si no contiene, guardo ids normalmente
+                    if len(traducir)==0:
+                        # Veo que main_id tenga algo
+                        if main_id != '':
+                            # Veo si main_id esta en dict_out.keys()
+                            if not (main_id in dict_out.keys()):
+                                # Agrego fold change transformado con fc_from_log_fc()
+                                dict_out[main_id] = fc_abs*1; 
+                            elif not (dict_out[main_id] == fc_abs*1):
+                                print('ERROR: id repetido y valores de fc diferentes.')
+                                print('fc_abs = ' + str(fc_abs))
+                                print('dict_out[' + str(main_id) + '] = ' + str(dict_out[main_id]))
+                                if len(main_id_raw.split('|'))==1:
+                                    dict_out[main_id] = fc_abs*1; 
+                            else:
+                                print('WARNING: id ' + str(main_id) + ' repetido en dict_out.keys().')
+                            # Sumo 1 a gen encontrado si se encontro un ID
+                            cont_encontrados+=1; 
+                        # Sumo 1 a genes totales aunque no se haya encontrado un ID
+                        cont_totales+=1; 
+                    # Si contiene elementos, trato de buscar los ensembl IDs correspondientes a los nombres de genes
+                    else:
+                        # Inicializo un booleano de genes encontrados
+                        gen_encontrado = False; 
+                        # Defino el ID de entrez y el nombre del gen
+                        entrez_id = main_id; # Por ahora no se usa
+                        gene_name = l_line[traducir[0]]; 
+                        genoma = traducir[1]; 
+                        # Uso .gene_ids_of_gene_name() para ver si el gen aparece en el genoma
+                        try:
+                            l_genes = genoma.gene_ids_of_gene_name(gene_name); 
+                            # Veo si hay genes en l_genes
+                            for curr_gen in l_genes:
+                                gen_encontrado = True; 
+                                # Veo si curr_gen esta en dict_out.keys()
+                                if not (curr_gen in dict_out.keys()):
+                                    # Agrego fold change transformado con fc_from_log_fc()
+                                    dict_out[curr_gen] = fc_abs*1; 
+                                elif not (dict_out[curr_gen] == fc_abs*1):
+                                    print('ERROR: id repetido y valores de fc diferentes.')
+                                    print('fc_abs = ' + str(fc_abs))
+                                    print('dict_out[' + str(curr_gen) + '] = ' + str(dict_out[curr_gen]))
+                                else:
+                                    print('WARNING: id ' + str(curr_gen) + ' repetido en dict_out.keys().')
+                        except:
+                            # Tiro error si no se encontro nada
+                            print('No se encontro ningun gen con gene_name ' + str(gene_name))
                         # Sumo 1 a gen encontrado si se encontro un ID
-                        cont_encontrados+=1; 
-                    # Sumo 1 a genes totales aunque no se haya encontrado un ID
-                    cont_totales+=1; 
-                # Si contiene elementos, trato de buscar los ensembl IDs correspondientes a los nombres de genes
-                else:
-                    # Inicializo la lista de genes que se agrega a M_out
-                    M_add = []; 
-                    # Inicializo un booleano de genes encontrados
-                    gen_encontrado = False; 
-                    # Defino el ID de entrez y el nombre del gen
-                    entrez_id = l_line[id_col]; 
-                    gene_name = l_line[traducir[0]]; 
-                    genoma = traducir[1]; 
-                    # Uso .gene_ids_of_gene_name() para ver si el gen aparece en el genoma
-                    try:
-                        l_genes = genoma.gene_ids_of_gene_name(gene_name); 
-                        # Veo si hay genes en l_genes
-                        for curr_gen in l_genes:
-                            gen_encontrado=True; 
-                            # Inicializo la lista que se agrega a M_add
-                            l_out = []; 
-                            # Agrego los valores importantes a devolver
-                            l_out.append(str(curr_gen)); 
-                            l_out.append(float(l_line[updown_col])); 
-                            # Agrego l_out a M_add
-                            M_add.append(l_out[:]); 
-                    except:
-                        # Tiro error si no se encontro nada
-                        print('No se encontro ningun gen con gene_name ' + str(gene_name))
-                    # Agrego M_add a M_out
-                    M_out = M_out + M_add; 
-                    # Sumo 1 a gen encontrado si se encontro un ID
-                    if gen_encontrado:
-                        cont_encontrados+=1; 
-                    # Sumo 1 a genes totales aunque no se haya encontrado un ID
-                    cont_totales+=1; 
+                        if gen_encontrado:
+                            cont_encontrados+=1; 
+                        # Sumo 1 a genes totales aunque no se haya encontrado un ID
+                        cont_totales+=1; 
     ### Display
     print('Genes totales: ' + str(cont_totales))
     print('Genes traducidos: ' + str(cont_encontrados))
-    print('Genes encontrados: ' + str(len(M_out)))
+    print('Genes encontrados: ' + str(len(dict_out.keys())))
     ###
-    return M_out
+    return dict_out
+
+
+def fc_from_log_fc(fc_float, base=2):
+    '''Funcion para devolver el fold change a partir de log(fold change).
+    Se asume que se obtiene el fold change con signo(fc_float)*base^(abs(fc_float))'''
+
+    # Defino el exponente como abs(fc_float)
+    exponent_fc = abs(fc_float); 
+    # Defino fc_abs exponenciando la base y multiplicando por el signo de fc_float
+    fc_abs = sign(fc_float)*(base**exponent_fc); 
+    return fc_abs
 
 
 def guardar_matriz(nom_out, M_out, path_out='', ext='.csv', sep=';', l_head=[]):
@@ -628,6 +719,26 @@ def seqio_chr_n(peaks, nombre_genoma, path_fasta=''):
         except:
             print('ERROR: chr_n ' + str(chr_n) + ' no se pudo abrir. nom_fasta: ' + str(nom_fasta) + ' ; path_fasta: ' + str(path_fasta))
     return dict_out
+
+
+def sign(n, zero=0, nan=0):
+    '''Funcion signo, hecha a mano porque python no la tiene.
+    zero es el valor que se devuelve si n==0.
+    nan es el valor que se devuelve si n no es un numero.'''
+    # Inicializo el valor que se devuelve
+    ret = ''; 
+    # Uso try para que se rompa si n no es un numero
+    try:
+        # Veo si n es igual a 0
+        if n==0:
+            ret = zero; 
+        else:
+            # Si n no es igual a cero, uso esta funcion para evitar if/else
+            ret = (int(n>0)*2)-1; 
+    except:
+        # Si n no es un numero, devuelvo nan
+        ret = nan; 
+    return ret
 
 
 #################################### RESULTADOS ###################################
