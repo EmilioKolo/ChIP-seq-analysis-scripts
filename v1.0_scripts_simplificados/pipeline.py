@@ -390,7 +390,6 @@ def eliminar_duplicados(l_in, col_index=0):
 
 def secuencia_peak(record_seq, pos_ini, pos_end):
     '''Funcion para obtener la secuencia del rango definido por chr_n, pos_ini y pos_end.
-    nombre_genoma esta pensado para funcionar con hg19, hg38, mm9 y mm10. 
     Devuelve un string con una secuencia de ADN.'''
 
     # Extraigo la secuencia de record_seq
