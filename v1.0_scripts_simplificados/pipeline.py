@@ -181,6 +181,7 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
             M_su_pssm = sitios_union_pssm(seq_peak, curr_peak[0], pssm, score_cutoff, int(curr_peak[1])-1); 
             # Recorro M_su_lista y M_su_pssm para agregar info de genes up/down regulados
             for j in range(len(M_su_lista)):
+                M_su_lista[j].append(''); # Agrego una columna vacia porque pssm incluye score
                 M_su_lista[j].append(len(M_genes_cerca)); 
                 M_su_lista[j].append(int(n_genes_total)); 
                 M_su_lista[j].append(int(n_genes_up)); 
@@ -210,11 +211,16 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
         if ((i+1)%100==0) or i==0:
             print('Avance: ' + str(i+1) + ' de ' + str(len_peaks))
         ###
+    # Elimino genes duplicados
     M_genes = eliminar_duplicados(M_genes); 
-    M_su = guardar_matriz(nom_out_base+'_sitios_union', M_su, path_out=path_out, l_head=['chr_n', 'pos_ini', 'pos_end', 'seq', 'source', 'score_pssm']); 
-    M_genes = guardar_matriz(nom_out_base+'_genes', M_genes, path_out=path_out, l_head=['gene_id', 'chr_n', 'pos0', 'biotype', 'fold_change']); 
-    M_peaks = guardar_matriz(nom_out_base+'_peaks', M_peaks, path_out=path_out, 
-                             l_head=['chr_n', 'pos_ini', 'pos_end', 'n_genes', 'n_su', 'n_su_lista', 'n_su_pssm', 'n_genes_cerca', 'n_updown_total', 'n_upreg', 'n_downreg']); 
+    # Defino l_head para las distintas matrices
+    l_head_su = ['chr_n', 'pos_ini', 'pos_end', 'seq', 'source', 'score_pssm', 'n_genes_cerca', 'n_updown_total', 'n_upreg', 'n_downreg']; 
+    l_head_genes = ['gene_id', 'chr_n', 'pos0', 'biotype', 'fold_change']; 
+    l_head_peaks = ['chr_n', 'pos_ini', 'pos_end', 'n_genes', 'n_su', 'n_su_lista', 'n_su_pssm', 'n_genes_cerca', 'n_updown_total', 'n_upreg', 'n_downreg']; 
+    # Guardo las matrices con guardar_matriz()
+    M_su = guardar_matriz(nom_out_base+'_sitios_union', M_su, path_out=path_out, l_head=l_head_su); 
+    M_genes = guardar_matriz(nom_out_base+'_genes', M_genes, path_out=path_out, l_head=l_head_genes); 
+    M_peaks = guardar_matriz(nom_out_base+'_peaks', M_peaks, path_out=path_out, l_head=l_head_peaks); 
     return M_peaks, M_su, M_genes
 
 
