@@ -236,10 +236,12 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
     return M_peaks, M_su, M_genes
 
 
-def pipeline_meme_chip(nom_sitios, nom_out, path_sitios='', path_out='', col_sitios=[0,1,2], l_filt=[]):
+def pipeline_meme_chip(nom_sitios, nom_out, largo_sitios=0, col_sitios=[0,1,2], l_filt=[], path_sitios='', path_out=''):
     '''Genera un archivo .fasta con las secuencias de picos de ChIP-seq para ser mandados a MEME-ChIP.
     Se seleccionan picos de acuerdo a distintos criterios determinados por l_filt.
-    l_filt es una lista de tuplas de tipo (num_col, valor_esperado)'''
+    l_filt es una lista de tuplas de tipo (num_col, valor_esperado).
+    col_sitios es una lista ordenada con la posicion de las columnas chr_n, pos_ini, pos_end en M_sitios.
+    largo_sitios define si todos los sitios van a devolverse con la misma longitud (si es 0 se devuelven los sitios de largo original)'''
 
     # Abro el archivo de peaks o sitios de union
     M_sitios = abrir_csv(nom_sitios, path_arch=path_sitios); 
@@ -259,10 +261,17 @@ def pipeline_meme_chip(nom_sitios, nom_out, path_sitios='', path_out='', col_sit
                 l_sitio_filt.append(curr_sitio[col]); 
             # Agrego l_sitio_filt a M_sitios_filt
             M_sitios_filt.append(l_sitio_filt[:]); 
+    # Si largo_sitios es mayor a 0, se unifican los largos de todos los sitios en M_sitios_filt
+    if largo_sitios>0:
+        # Recorro M_sitios_filt
+        for i in range(len(M_sitios_filt)): 
+            curr_sitio = M_sitios_filt[i]; 
+            ### FALTA
+            # Unificar largos (ver en scripts MEME-ChIP)
+            ###
     ### FALTA
-    # Unificar largos (ver en scripts)
-    # Obtener secuencias (ver en scripts)
-    # Guardar en archivo .fasta (ver en scripts)
+    # Obtener secuencias (ver en scripts pipeline_generador)
+    # Guardar en archivo .fasta (ver en scripts MEME-ChIP)
     ###
     pass
 
