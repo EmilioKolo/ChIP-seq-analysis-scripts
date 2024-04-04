@@ -54,7 +54,12 @@ mm10 = EnsemblRelease(102, species='mouse');
     # X Seleccionar genes en M_genes por lista RNAseq y agregar columna
     # X Agregar info de updown a M_genes
 # Generar secuencias para MEME-ChIP
-    # Ver 4-GeneracionFastaMEME.py en Scripts_0_16
+    # * Ver 4-GeneracionFastaMEME.py en Scripts_0_16
+    # X Abrir archivos de output_git (peaks o sitios de union?)
+    # X Seleccionar sitios/peaks
+    # Unificar largos (ver en scripts)
+    # Obtener secuencias (ver en scripts)
+    # Guardar en archivo .fasta (ver en scripts)
 # Agregar cosas relacionadas a estudiar varios factores de transcripcion
 ###
 '''
@@ -95,6 +100,7 @@ nom_pssm_nkx25_mouse = 'NKX25_MOUSE.H11MO.0.A.pcm';
 score_mult = 0.9; # Multiplicador del score maximo de pssm que se usa como cutoff
 organism = 'human'; # human o mouse
 test_used = 0; # 0 para correr todo completo, numeros mayores a 0 para correr subsets de largo test_used
+correr_generador = False; 
 
 
 
@@ -129,9 +135,10 @@ def _main():
         return ''
     score_cutoff_pssm = pssm_usado.max*score_mult; 
     
-    #M_peaks, M_su, M_genes = pipeline_generador(nom_bed_usado, nom_rnaseq_usado, nom_output, genoma_usado, nom_genoma_usado, pssm_usado, score_cutoff_pssm, 
-    #                                            path_bed=path_git_main, path_out=path_out_main, path_fasta=path_fasta_main, dist_max_gen=dist_max_main, 
-    #                                            L_su=L_confirmados, test_mode=test_used, id_col_rnaseq=id_col_usado, updown_col_rnaseq=updown_col_usado, l_translate=l_translate); 
+    if correr_generador:
+        M_peaks, M_su, M_genes = pipeline_generador(nom_bed_usado, nom_rnaseq_usado, nom_output, genoma_usado, nom_genoma_usado, pssm_usado, score_cutoff_pssm, 
+                                                    path_bed=path_git_main, path_out=path_out_main, path_fasta=path_fasta_main, dist_max_gen=dist_max_main, 
+                                                    L_su=L_confirmados, test_mode=test_used, id_col_rnaseq=id_col_usado, updown_col_rnaseq=updown_col_usado, l_translate=l_translate); 
 
     ### FALTA
     # pipeline_meme_chip()
@@ -229,12 +236,30 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
     return M_peaks, M_su, M_genes
 
 
-def pipeline_meme_chip():
+def pipeline_meme_chip(nom_sitios, nom_out, path_sitios='', path_out='', col_sitios=[0,1,2], l_filt=[]):
     '''Genera un archivo .fasta con las secuencias de picos de ChIP-seq para ser mandados a MEME-ChIP.
-    Se seleccionan picos de acuerdo a distintos criterios.'''
+    Se seleccionan picos de acuerdo a distintos criterios determinados por l_filt.
+    l_filt es una lista de tuplas de tipo (num_col, valor_esperado)'''
+
+    # Abro el archivo de peaks o sitios de union
+    M_sitios = abrir_csv(nom_sitios, path_arch=path_sitios); 
+    # Inicializo la matriz de sitios usada
+    M_sitios_filt = []; 
+    # Recorro M_sitios
+    for i in range(len(M_sitios)):
+        curr_sitio = M_sitios[i]; 
+        # Defino si selecciono el sitio con func_filt()
+        pasa_sitio = func_filt(curr_sitio, l_filt); 
+        # Si pasa el sitio lo agrego a M_sitios_filt
+        if pasa_sitio:
+            # Inicializo la lista que se agrega a M_sitios_filt
+            l_sitio_filt = []; 
+            # Agrego las columnas en col_sitios
+            for col in col_sitios:
+                l_sitio_filt.append(curr_sitio[col]); 
+            # Agrego l_sitio_filt a M_sitios_filt
+            M_sitios_filt.append(l_sitio_filt[:]); 
     ### FALTA
-    # Abrir archivos de output_git (peaks o sitios de union?)
-    # Seleccionar sitios/peaks
     # Unificar largos (ver en scripts)
     # Obtener secuencias (ver en scripts)
     # Guardar en archivo .fasta (ver en scripts)
@@ -243,6 +268,22 @@ def pipeline_meme_chip():
 
 
 ### Funciones principales del pipeline
+
+
+def func_filt(l_in, l_filt, default_pass=False):
+    '''Filtra l_in de acuerdo a l_filt. Devuelvo True si l_in pasa el filtro.
+    l_filt es una lista de tuplas de tipo (num_col, valor_esperado).
+    default_pass determina si se incluyen o excluyen los sitios filtrados'''
+
+    # Inicializo el valor de pass con default_pass
+    ret = default_pass; 
+    # Recorro l_filt
+    for i in range(len(l_filt)):
+        curr_filt = l_filt[i]; 
+        # Veo si l_in pasa curr_filt
+        if l_in[curr_filt[0]]==curr_filt[1]:
+            ret = not default_pass; 
+    return ret
 
 
 def genes_cercanos_peak(chr_n, pos_ini, pos_end, dist_max, genoma_ensembl):
@@ -497,6 +538,43 @@ def abrir_bed(nom_arch, path_arch='', sep='\t', ext='.bed', col_num=3):
             L_line = curr_line.rstrip().split(sep=sep); 
             # Cargo L_line en M_out
             M_out.append(L_line[:col_num]); 
+    return M_out
+
+
+def abrir_csv(nom_arch, path_arch='', sep=';', ext='.csv', con_headers=True, devolver_header=False):
+    '''Abre archivos .csv y devuelve una lista de listas con las filas.
+    con_headers define si hay header (se ignora por defecto).
+    devolver_header permite devolver el header como segundo output'''
+
+    # Inicializo la matriz que se devuelve
+    M_out = []; 
+    # Inicializo booleano y lista de headers
+    header = con_headers; 
+    l_head = []; 
+    # Defino la direccion del archivo con nom_arch y path_arch
+    if path_arch=='':
+        filepath = nom_arch + ext; 
+    else:
+        filepath = os.path.join(path_arch, nom_arch + ext); 
+    # Abro el archivo filepath
+    with open(filepath, 'r') as f_out:
+        print('Archivo ' + nom_arch + ' abierto.')
+        # Recorro cada fila
+        for curr_line in f_out.readlines():
+            # Veo si tengo que pasar el header
+            if header:
+                # Transformo la linea en lista
+                l_head = curr_line.rstrip().split(sep=sep); 
+                # Paso header a False para no ver la proxima linea
+                header = False; 
+            else:
+                # Transformo la linea en lista
+                l_line = curr_line.rstrip().split(sep=sep); 
+                # Cargo L_line en M_out
+                M_out.append(l_line[:]); 
+    # Si devolver_header es True, se devuelve M_out y l_head
+    if devolver_header:
+        return M_out, l_head
     return M_out
 
 
