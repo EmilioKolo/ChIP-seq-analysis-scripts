@@ -58,8 +58,10 @@ mm10 = EnsemblRelease(102, species='mouse');
     # X Abrir archivos de output_git (peaks o sitios de union?)
     # X Seleccionar sitios/peaks
     # X Unificar largos (ver en scripts)
-    # Obtener secuencias (ver en scripts)
-    # Guardar en archivo .fasta (ver en scripts)
+    # X Obtener secuencias (ver en scripts)
+    # ~ Guardar en archivo .fasta (ver en scripts)
+        # Solo falta funcion guardar_fasta()
+    # Testear que pipeline_meme_chip() ande
 # Agregar cosas relacionadas a estudiar varios factores de transcripcion
 ###
 '''
@@ -142,9 +144,9 @@ def _main():
                                                     L_su=L_confirmados, test_mode=test_used, id_col_rnaseq=id_col_usado, updown_col_rnaseq=updown_col_usado, l_translate=l_translate); 
 
     if correr_memechip:
-        _ = pipeline_meme_chip(nom_output+'_sitios_union', '', 1500, path_sitios=path_out_main, path_out=path_out_main); 
+        _ = pipeline_meme_chip(nom_output+'_sitios_union', nom_output+'_sitios_union_fasta_nofilt', nom_genoma_usado, 1500, path_sitios=path_out_main, path_out=path_out_main, path_fasta=path_fasta_main); 
     ### FALTA
-    # pipeline_meme_chip()
+    # ~ pipeline_meme_chip()
     # Scripts para otros TF
     ###
 
@@ -166,13 +168,13 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
     M_peaks = abrir_bed(nom_bed, path_arch=path_bed); 
     # Abro los resultados de RNA-seq
     dict_rnaseq = abrir_rnaseq(nom_rnaseq, path_arch=path_bed, sep=';', ext='.csv', id_col=id_col_rnaseq, updown_col=updown_col_rnaseq, traducir=l_translate); 
-    # Obtengo la secuencia de todos los archivos fasta del genoma con elementos SeqIO
-    dict_chr_n = seqio_chr_n(M_peaks, nombre_genoma, path_fasta); 
     ### Reviso si hago test
     if test_mode>0:
         shuffle(M_peaks); 
         M_peaks = M_peaks[:test_mode]; 
     ###
+    # Obtengo la secuencia de todos los archivos fasta del genoma con elementos SeqIO
+    dict_chr_n = seqio_chr_n(M_peaks, nombre_genoma, path_fasta); 
     # Inicializo la matriz de sitios de union
     M_su = []; 
     # Inicializo la matriz de genes
@@ -226,6 +228,8 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
         if ((i+1)%100==0) or i==0:
             print('Avance: ' + str(i+1) + ' de ' + str(len_peaks))
         ###
+    # Vacio dict_chr_n despues de usarlo
+    dict_chr_n = {}; 
     # Elimino genes duplicados
     M_genes = eliminar_duplicados(M_genes); 
     # Defino l_head para las distintas matrices
@@ -239,7 +243,7 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
     return M_peaks, M_su, M_genes
 
 
-def pipeline_meme_chip(nom_sitios, nom_out, largo_sitios=0, col_sitios=[0,1,2], l_filt=[], path_sitios='', path_out=''):
+def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_sitios=[0,1,2], l_filt=[], path_sitios='', path_out='', path_fasta=''):
     '''Genera un archivo .fasta con las secuencias de picos de ChIP-seq para ser mandados a MEME-ChIP.
     Se seleccionan picos de acuerdo a distintos criterios determinados por l_filt.
     l_filt es una lista de tuplas de tipo (num_col, valor_esperado).
@@ -280,10 +284,23 @@ def pipeline_meme_chip(nom_sitios, nom_out, largo_sitios=0, col_sitios=[0,1,2], 
             # Asigno los valores de sitio_largo_unificado a M_sitios_filt[i]
             M_sitios_filt[i][1] = sitio_largo_unificado[0]; 
             M_sitios_filt[i][2] = sitio_largo_unificado[1]; 
-    ### FALTA
-    # Obtener secuencias (ver en scripts pipeline_generador)
-    # Guardar en archivo .fasta (ver en scripts MEME-ChIP)
-    ###
+    # Obtengo la secuencia de todos los archivos fasta del genoma con elementos SeqIO
+    dict_chr_n = seqio_chr_n(M_sitios_filt, nombre_genoma, path_fasta); 
+    # Inicializo una lista de secuencias
+    dict_fasta = {}; 
+    # Recorro M_sitios_filt
+    for i in range(len(M_sitios_filt)): 
+        curr_sitio = M_sitios_filt[i]; 
+        # Defino seq de curr_sitio
+        seq_peak = secuencia_peak(dict_chr_n[curr_sitio[0]], int(curr_sitio[1]), int(curr_sitio[2])); 
+        # Defino id_dict
+        id_dict = str(i) + '_' + str(curr_sitio[0]) + '_' + str(curr_sitio[1]) + '_' + str(curr_sitio[2]); 
+        # Agrego seq_peak a dict_fasta
+        dict_fasta[id_dict] = str(seq_peak); 
+    # Vacio dict_chr_n despues de usarlo
+    dict_chr_n = {}; 
+    # Guardo dict_fasta en archivo nom_out en path_out
+    dict_fasta = guardar_fasta(dict_fasta, nom_out, path_out=path_out); 
     return M_sitios_filt
 
 
@@ -780,6 +797,13 @@ def fc_from_log_fc(fc_float, base=2):
     # Defino fc_abs exponenciando la base y multiplicando por el signo de fc_float
     fc_abs = sign(fc_float)*(base**exponent_fc); 
     return fc_abs
+
+
+def guardar_fasta(dict_fasta, nom_out, path_out=''):
+    '''Guarda un diccionario como archivo .fasta'''
+    ### FALTA
+    ###
+    pass
 
 
 def guardar_matriz(nom_out, M_out, path_out='', ext='.csv', sep=';', l_head=[]):
