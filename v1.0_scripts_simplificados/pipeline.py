@@ -57,7 +57,7 @@ mm10 = EnsemblRelease(102, species='mouse');
     # * Ver 4-GeneracionFastaMEME.py en Scripts_0_16
     # X Abrir archivos de output_git (peaks o sitios de union?)
     # X Seleccionar sitios/peaks
-    # Unificar largos (ver en scripts)
+    # X Unificar largos (ver en scripts)
     # Obtener secuencias (ver en scripts)
     # Guardar en archivo .fasta (ver en scripts)
 # Agregar cosas relacionadas a estudiar varios factores de transcripcion
@@ -101,6 +101,7 @@ score_mult = 0.9; # Multiplicador del score maximo de pssm que se usa como cutof
 organism = 'human'; # human o mouse
 test_used = 0; # 0 para correr todo completo, numeros mayores a 0 para correr subsets de largo test_used
 correr_generador = False; 
+correr_memechip = True; 
 
 
 
@@ -140,6 +141,8 @@ def _main():
                                                     path_bed=path_git_main, path_out=path_out_main, path_fasta=path_fasta_main, dist_max_gen=dist_max_main, 
                                                     L_su=L_confirmados, test_mode=test_used, id_col_rnaseq=id_col_usado, updown_col_rnaseq=updown_col_usado, l_translate=l_translate); 
 
+    if correr_memechip:
+        _ = pipeline_meme_chip(nom_output+'_sitios_union', '', 1500, path_sitios=path_out_main, path_out=path_out_main); 
     ### FALTA
     # pipeline_meme_chip()
     # Scripts para otros TF
@@ -250,8 +253,10 @@ def pipeline_meme_chip(nom_sitios, nom_out, largo_sitios=0, col_sitios=[0,1,2], 
     # Recorro M_sitios
     for i in range(len(M_sitios)):
         curr_sitio = M_sitios[i]; 
+        # Inicializo default_pass para no filtrar si l_filt es una lista vacia
+        default_pass_filt = len(l_filt)==0; 
         # Defino si selecciono el sitio con func_filt()
-        pasa_sitio = func_filt(curr_sitio, l_filt); 
+        pasa_sitio = func_filt(curr_sitio, l_filt, default_pass=default_pass_filt); 
         # Si pasa el sitio lo agrego a M_sitios_filt
         if pasa_sitio:
             # Inicializo la lista que se agrega a M_sitios_filt
@@ -265,34 +270,24 @@ def pipeline_meme_chip(nom_sitios, nom_out, largo_sitios=0, col_sitios=[0,1,2], 
     if largo_sitios>0:
         # Recorro M_sitios_filt
         for i in range(len(M_sitios_filt)): 
+            # curr_sitio tiene formato (chr_n, pos_ini, pos_end), con pos_ini y pos_end posiblemente registrados como str
             curr_sitio = M_sitios_filt[i]; 
-            ### FALTA
-            # Unificar largos (ver en scripts MEME-ChIP)
-            ###
+            # Defino pos_ini y pos_end
+            pos_ini = min(int(curr_sitio[1]), int(curr_sitio[2])); 
+            pos_end = max(int(curr_sitio[1]), int(curr_sitio[2])); 
+            # Creo sitio_largo_unificado con unificar_largos()
+            sitio_largo_unificado = unificar_largos(pos_ini, pos_end, largo_sitios); 
+            # Asigno los valores de sitio_largo_unificado a M_sitios_filt[i]
+            M_sitios_filt[i][1] = sitio_largo_unificado[0]; 
+            M_sitios_filt[i][2] = sitio_largo_unificado[1]; 
     ### FALTA
     # Obtener secuencias (ver en scripts pipeline_generador)
     # Guardar en archivo .fasta (ver en scripts MEME-ChIP)
     ###
-    pass
+    return M_sitios_filt
 
 
 ### Funciones principales del pipeline
-
-
-def func_filt(l_in, l_filt, default_pass=False):
-    '''Filtra l_in de acuerdo a l_filt. Devuelvo True si l_in pasa el filtro.
-    l_filt es una lista de tuplas de tipo (num_col, valor_esperado).
-    default_pass determina si se incluyen o excluyen los sitios filtrados'''
-
-    # Inicializo el valor de pass con default_pass
-    ret = default_pass; 
-    # Recorro l_filt
-    for i in range(len(l_filt)):
-        curr_filt = l_filt[i]; 
-        # Veo si l_in pasa curr_filt
-        if l_in[curr_filt[0]]==curr_filt[1]:
-            ret = not default_pass; 
-    return ret
 
 
 def genes_cercanos_peak(chr_n, pos_ini, pos_end, dist_max, genoma_ensembl):
@@ -515,6 +510,22 @@ def eliminar_duplicados(l_in, col_index=0):
     return l_out
 
 
+def func_filt(l_in, l_filt, default_pass=False):
+    '''Filtra l_in de acuerdo a l_filt. Devuelvo True si l_in pasa el filtro.
+    l_filt es una lista de tuplas de tipo (num_col, valor_esperado).
+    default_pass determina si se incluyen o excluyen los sitios filtrados'''
+
+    # Inicializo el valor de pass con default_pass
+    ret = default_pass; 
+    # Recorro l_filt
+    for i in range(len(l_filt)):
+        curr_filt = l_filt[i]; 
+        # Veo si l_in pasa curr_filt
+        if l_in[curr_filt[0]]==curr_filt[1]:
+            ret = not default_pass; 
+    return ret
+
+
 def secuencia_peak(record_seq, pos_ini, pos_end):
     '''Funcion para obtener la secuencia del rango definido por chr_n, pos_ini y pos_end.
     Devuelve un string con una secuencia de ADN.'''
@@ -522,6 +533,35 @@ def secuencia_peak(record_seq, pos_ini, pos_end):
     # Extraigo la secuencia de record_seq
     seq_out = record_seq[pos_ini-1:pos_end]; 
     return seq_out
+
+
+def unificar_largos(pos_ini, pos_end, largo_final):
+    '''Recibe ints con una posicion inicial y una posicion final y devuelve un rango con largo largo_final.
+    Asume que pos_ini es menor a pos_end y que largo_final es mayor a 0. Puede ser que funcione de todas formas (no testeado)
+    Se puede hacer transformando los booleanos de largo_final mayor/menor a pos_end-pos_ini, pero no se leeria bien.'''
+
+    # Inicializo la lista que se devuelve
+    rango_out = [int(pos_ini), int(pos_end)]; 
+    # Inicializo un contador de paridad
+    parity = False; 
+    # Veo si largo_final es mayor o menor que la diferencia entre pos_ini y pos_end
+    if largo_final > (rango_out[1]-rango_out[0]):
+        # Si largo_final es mayor, tengo que separar pos_end y pos_ini y agrandar el rango
+        while largo_final > (rango_out[1]-rango_out[0]):
+            # Uso parity para definir si se modifica pos_ini o pos_end
+            rango_out[int(parity)] += (int(parity)*2)-1; 
+            parity = not parity; 
+    elif largo_final < (rango_out[1]-rango_out[0]):
+        # Si largo_final es menor, tengo que acercar pos_end y pos_ini y achicar el rango
+        while largo_final < (rango_out[1]-rango_out[0]):
+            # Uso parity para definir si se modifica pos_ini o pos_end
+            rango_out[int(parity)] += (int(not parity)*2)-1; 
+            parity = not parity; 
+    ### Revision
+    if largo_final != (rango_out[1]-rango_out[0]):
+        # Esto no deberia pasar
+        print('ERROR: Paso algo malo con los rangos')
+    return rango_out
 
 
 ### Funciones para abrir y guardar archivos
