@@ -53,7 +53,7 @@ mm10 = EnsemblRelease(102, species='mouse');
     # X Pasarlos a ID de Ensembl
     # X Seleccionar genes en M_genes por lista RNAseq y agregar columna
     # X Agregar info de updown a M_genes
-# Generar secuencias para MEME-ChIP
+# ~ Generar secuencias para MEME-ChIP
     # * Ver 4-GeneracionFastaMEME.py en Scripts_0_16
     # X Abrir archivos de output_git (peaks o sitios de union?)
     # X Seleccionar sitios/peaks
@@ -143,10 +143,14 @@ def _main():
                                                     L_su=L_confirmados, test_mode=test_used, id_col_rnaseq=id_col_usado, updown_col_rnaseq=updown_col_usado, l_translate=l_translate); 
 
     if correr_memechip:
-        M_sitios_filt = pipeline_meme_chip(nom_output+'_sitios_union', nom_output+'_sitios_union_fasta_nofilt', nom_genoma_usado, 1500, 
+        nom_input_meme_chip = nom_output+'_sitios_union'; 
+        nom_fasta_out = nom_input_meme_chip+'_fasta_nofilt'; 
+        l_filt_usado = []; 
+        M_sitios_filt = pipeline_meme_chip(nom_input_meme_chip, nom_fasta_out, nom_genoma_usado, largo_sitios=1500, l_filt=l_filt_usado, 
                                            path_sitios=path_out_main, path_out=path_out_main, path_fasta=path_fasta_main); 
 
     ### FALTA
+    # Probar pipeline_meme_chip() con filtros
     # Scripts para otros TF
     ###
 
