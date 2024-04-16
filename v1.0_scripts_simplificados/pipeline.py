@@ -53,15 +53,16 @@ mm10 = EnsemblRelease(102, species='mouse');
     # X Pasarlos a ID de Ensembl
     # X Seleccionar genes en M_genes por lista RNAseq y agregar columna
     # X Agregar info de updown a M_genes
-# ~ Generar secuencias para MEME-ChIP
+# X Generar secuencias para MEME-ChIP
     # * Ver 4-GeneracionFastaMEME.py en Scripts_0_16
     # X Abrir archivos de output_git (peaks o sitios de union?)
     # X Seleccionar sitios/peaks
     # X Unificar largos (ver en scripts)
     # X Obtener secuencias (ver en scripts)
     # X Guardar en archivo .fasta (ver en scripts)
-    # ~ Testear que pipeline_meme_chip() ande
+    # X Testear que pipeline_meme_chip() ande
 # Agregar cosas relacionadas a estudiar varios factores de transcripcion
+# Correr scripts MEME-ChIP para generar resultados (capaz no es necesario)
 ###
 '''
 
@@ -102,7 +103,8 @@ score_mult = 0.9; # Multiplicador del score maximo de pssm que se usa como cutof
 organism = 'human'; # human o mouse
 test_used = 0; # 0 para correr todo completo, numeros mayores a 0 para correr subsets de largo test_used
 correr_generador = False; 
-correr_memechip = True; 
+correr_memechip = False; 
+correr_otros_tf = True; 
 
 
 
@@ -150,6 +152,8 @@ def _main():
         M_sitios_filt = pipeline_meme_chip(nom_input_meme_chip, nom_fasta_out, nom_genoma_usado, largo_sitios=1500, l_filt=l_filt_usado, default_pass_filt=default_filt, 
                                            path_sitios=path_out_main, path_out=path_out_main, path_fasta=path_fasta_main); 
 
+    if correr_otros_tf:
+        pass
     ### FALTA
     # Scripts para otros TF
     ###
@@ -323,6 +327,11 @@ def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_s
     # Guardo dict_fasta en archivo nom_out en path_out
     dict_fasta = guardar_fasta(dict_fasta, nom_out, path_out=path_out); 
     return M_sitios_filt
+
+
+def pipeline_otros_tf():
+    '''Pipeline para buscar sitios de union de otros TF cerca de sitios de union generados por pipeline_generador()'''
+    pass
 
 
 ### Funciones principales del pipeline
