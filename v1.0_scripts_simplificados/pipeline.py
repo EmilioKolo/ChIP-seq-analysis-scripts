@@ -59,9 +59,8 @@ mm10 = EnsemblRelease(102, species='mouse');
     # X Seleccionar sitios/peaks
     # X Unificar largos (ver en scripts)
     # X Obtener secuencias (ver en scripts)
-    # ~ Guardar en archivo .fasta (ver en scripts)
-        # Solo falta funcion guardar_fasta()
-    # Testear que pipeline_meme_chip() ande
+    # X Guardar en archivo .fasta (ver en scripts)
+    # ~ Testear que pipeline_meme_chip() ande
 # Agregar cosas relacionadas a estudiar varios factores de transcripcion
 ###
 '''
@@ -144,9 +143,10 @@ def _main():
                                                     L_su=L_confirmados, test_mode=test_used, id_col_rnaseq=id_col_usado, updown_col_rnaseq=updown_col_usado, l_translate=l_translate); 
 
     if correr_memechip:
-        _ = pipeline_meme_chip(nom_output+'_sitios_union', nom_output+'_sitios_union_fasta_nofilt', nom_genoma_usado, 1500, path_sitios=path_out_main, path_out=path_out_main, path_fasta=path_fasta_main); 
+        M_sitios_filt = pipeline_meme_chip(nom_output+'_sitios_union', nom_output+'_sitios_union_fasta_nofilt', nom_genoma_usado, 1500, 
+                                           path_sitios=path_out_main, path_out=path_out_main, path_fasta=path_fasta_main); 
+
     ### FALTA
-    # ~ pipeline_meme_chip()
     # Scripts para otros TF
     ###
 
@@ -254,6 +254,9 @@ def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_s
     M_sitios = abrir_csv(nom_sitios, path_arch=path_sitios); 
     # Inicializo la matriz de sitios usada
     M_sitios_filt = []; 
+    ### Display
+    print('# Iniciando revision y filtrado de M_sitios')
+    ###
     # Recorro M_sitios
     for i in range(len(M_sitios)):
         curr_sitio = M_sitios[i]; 
@@ -272,6 +275,9 @@ def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_s
             M_sitios_filt.append(l_sitio_filt[:]); 
     # Si largo_sitios es mayor a 0, se unifican los largos de todos los sitios en M_sitios_filt
     if largo_sitios>0:
+        ### Display
+        print('# Iniciando unificacion de largos')
+        ###
         # Recorro M_sitios_filt
         for i in range(len(M_sitios_filt)): 
             # curr_sitio tiene formato (chr_n, pos_ini, pos_end), con pos_ini y pos_end posiblemente registrados como str
@@ -284,21 +290,33 @@ def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_s
             # Asigno los valores de sitio_largo_unificado a M_sitios_filt[i]
             M_sitios_filt[i][1] = sitio_largo_unificado[0]; 
             M_sitios_filt[i][2] = sitio_largo_unificado[1]; 
+    ### Display
+    print('# Iniciando extraccion de secuencias')
+    ###
+    # Cuento largo de M_sitios_filt
+    len_sitios_filt = len(M_sitios_filt); 
     # Obtengo la secuencia de todos los archivos fasta del genoma con elementos SeqIO
     dict_chr_n = seqio_chr_n(M_sitios_filt, nombre_genoma, path_fasta); 
     # Inicializo una lista de secuencias
     dict_fasta = {}; 
     # Recorro M_sitios_filt
-    for i in range(len(M_sitios_filt)): 
+    for i in range(len_sitios_filt): 
         curr_sitio = M_sitios_filt[i]; 
         # Defino seq de curr_sitio
         seq_peak = secuencia_peak(dict_chr_n[curr_sitio[0]], int(curr_sitio[1]), int(curr_sitio[2])); 
         # Defino id_dict
-        id_dict = str(i) + '_' + str(curr_sitio[0]) + '_' + str(curr_sitio[1]) + '_' + str(curr_sitio[2]); 
+        id_dict = str(i+1) + '_' + str(curr_sitio[0]) + '_' + str(curr_sitio[1]) + '_' + str(curr_sitio[2]); 
         # Agrego seq_peak a dict_fasta
         dict_fasta[id_dict] = str(seq_peak); 
+        ### Display
+        if ((i+1)%1000==0) or (i==0):
+            print('Progreso: ' + str(i+1) + ' de ' + str(len_sitios_filt))
+        ###
     # Vacio dict_chr_n despues de usarlo
     dict_chr_n = {}; 
+    ### Display
+    print('# Iniciando guardado de fasta')
+    ###
     # Guardo dict_fasta en archivo nom_out en path_out
     dict_fasta = guardar_fasta(dict_fasta, nom_out, path_out=path_out); 
     return M_sitios_filt
@@ -799,11 +817,26 @@ def fc_from_log_fc(fc_float, base=2):
     return fc_abs
 
 
-def guardar_fasta(dict_fasta, nom_out, path_out=''):
+def guardar_fasta(dict_fasta, nom_out, path_out='', ext='.fasta'):
     '''Guarda un diccionario como archivo .fasta'''
-    ### FALTA
-    ###
-    pass
+
+    # Defino la direccion del archivo con nom_out y path_out
+    if path_out=='':
+        filepath = nom_out + ext; 
+    else:
+        filepath = os.path.join(path_out, nom_out + ext); 
+    # Creo el archivo filepath
+    with open(filepath, 'w') as f_out:
+        print('Archivo ' + nom_out + ext + ' creado.')
+    # Vuelvo a abrirlo en modo append para escribirlo
+    with open(filepath, 'a') as f_out:
+        # Extraigo la lista de keys de dict_fasta
+        keys_dict = dict_fasta.keys(); 
+        # Recorro keys_dict
+        for curr_key in keys_dict:
+            f_out.write('>'+str(curr_key)+'\n'); 
+            f_out.write(str(dict_fasta[curr_key]+'\n')); 
+    return dict_fasta
 
 
 def guardar_matriz(nom_out, M_out, path_out='', ext='.csv', sep=';', l_head=[]):
