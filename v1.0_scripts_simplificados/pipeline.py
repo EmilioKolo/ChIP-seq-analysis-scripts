@@ -144,13 +144,13 @@ def _main():
 
     if correr_memechip:
         nom_input_meme_chip = nom_output+'_sitios_union'; 
-        nom_fasta_out = nom_input_meme_chip+'_fasta_nofilt'; 
-        l_filt_usado = []; 
-        M_sitios_filt = pipeline_meme_chip(nom_input_meme_chip, nom_fasta_out, nom_genoma_usado, largo_sitios=1500, l_filt=l_filt_usado, 
+        nom_fasta_out = nom_input_meme_chip+'_fasta_filt_updown'; 
+        l_filt_usado = [[7, '0']]; 
+        default_filt = False; 
+        M_sitios_filt = pipeline_meme_chip(nom_input_meme_chip, nom_fasta_out, nom_genoma_usado, largo_sitios=1500, l_filt=l_filt_usado, default_pass_filt=default_filt, 
                                            path_sitios=path_out_main, path_out=path_out_main, path_fasta=path_fasta_main); 
 
     ### FALTA
-    # Probar pipeline_meme_chip() con filtros
     # Scripts para otros TF
     ###
 
@@ -247,12 +247,13 @@ def pipeline_generador(nom_bed, nom_rnaseq, nom_out_base, genoma_ensembl, nombre
     return M_peaks, M_su, M_genes
 
 
-def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_sitios=[0,1,2], l_filt=[], path_sitios='', path_out='', path_fasta=''):
+def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_sitios=[0,1,2], l_filt=[], default_pass_filt=True, path_sitios='', path_out='', path_fasta=''):
     '''Genera un archivo .fasta con las secuencias de picos de ChIP-seq para ser mandados a MEME-ChIP.
     Se seleccionan picos de acuerdo a distintos criterios determinados por l_filt.
     l_filt es una lista de tuplas de tipo (num_col, valor_esperado).
+    default_pass_filt define si se asume que todos los sitios pasan y el filtro elimina sitios o si ningun sitio pasa y el filtro selecciona sitios
     col_sitios es una lista ordenada con la posicion de las columnas chr_n, pos_ini, pos_end en M_sitios.
-    largo_sitios define si todos los sitios van a devolverse con la misma longitud (si es 0 se devuelven los sitios de largo original)'''
+    largo_sitios define si todos los sitios van a devolverse con la misma longitud (si es 0 se devuelven los sitios de largo original).'''
 
     # Abro el archivo de peaks o sitios de union
     M_sitios = abrir_csv(nom_sitios, path_arch=path_sitios); 
@@ -264,8 +265,6 @@ def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_s
     # Recorro M_sitios
     for i in range(len(M_sitios)):
         curr_sitio = M_sitios[i]; 
-        # Inicializo default_pass para no filtrar si l_filt es una lista vacia
-        default_pass_filt = len(l_filt)==0; 
         # Defino si selecciono el sitio con func_filt()
         pasa_sitio = func_filt(curr_sitio, l_filt, default_pass=default_pass_filt); 
         # Si pasa el sitio lo agrego a M_sitios_filt
