@@ -154,9 +154,9 @@ def _main():
 
     if correr_otros_tf:
         pass
-    ### FALTA
-    # Scripts para otros TF
-    ###
+        ### FALTA
+        # Scripts para otros TF
+        ###
 
     return ''
 
@@ -331,6 +331,12 @@ def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_s
 
 def pipeline_otros_tf():
     '''Pipeline para buscar sitios de union de otros TF cerca de sitios de union generados por pipeline_generador()'''
+
+    ### FALTA
+    # Agarrar lista de TFs
+    # Buscar alrededor de sitios de union y/o adentro de peaks
+    # Guardar en archivo .csv
+    ###
     pass
 
 
