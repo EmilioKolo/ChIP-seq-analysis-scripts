@@ -94,7 +94,9 @@ path_out_main = path_output_dump_main + 'output_git\\';
 path_pwm_human = path_git_main + 'PWM_human\\'; 
 path_pwm_mouse = path_git_main + 'PWM_mouse\\'; 
 
-# Variables para pipeline
+# Variables para pipelines
+
+correr_generador = False; 
 dist_max_main = 1000000; 
 L_confirmados = ['GCAAGTG', 'GGAAGTG', 'GAAAGTG', 'ATAAGTG', 'GTAAGTG', 'CTAAGTG', 'TCAAGTG', 'TGAAGTG', 'TAAAGTG', 'TTAAGTG']; 
 nom_pssm_nkx25_human = 'NKX25_HUMAN.H11MO.0.B.pcm'; 
@@ -102,10 +104,21 @@ nom_pssm_nkx25_mouse = 'NKX25_MOUSE.H11MO.0.A.pcm';
 score_mult = 0.9; # Multiplicador del score maximo de pssm que se usa como cutoff
 organism = 'human'; # human o mouse
 test_used = 0; # 0 para correr todo completo, numeros mayores a 0 para correr subsets de largo test_used
-correr_generador = False; 
-correr_memechip = False; 
-correr_otros_tf = True; 
 
+correr_memechip = False; 
+largo_memechip = 1500; 
+
+correr_otros_tf = True; 
+dist_otros_tf = 1000; 
+dist_max_main_otros_tf = 1000000; 
+
+# Listas otros TFs
+L_arch_pwm_raton = ['NKX25_MOUSE.H11MO.0.A.pcm', 'TBX20_MOUSE.H11MO.0.C.pcm', 'MEIS1_MOUSE.H11MO.1.A.pcm', 'TGIF1_MOUSE.H11MO.0.A.pcm', 
+                    'HAND1_MOUSE.H11MO.0.C.pcm', 'MAF_MOUSE.H11MO.1.A.pcm', 'GATA1_MOUSE.H11MO.1.A.pcm', 'GATA6_MOUSE.H11MO.0.A.pcm', 'GATA4_MOUSE.H11MO.0.A.pcm']; 
+L_arch_pwm_humano = ['NKX25_HUMAN.H11MO.0.B.pcm', 'TBX20_HUMAN.H11MO.0.D.pcm', 'MEIS1_HUMAN.H11MO.1.B.pcm', 'TGIF1_HUMAN.H11MO.0.A.pcm', 'HAND1_HUMAN.H11MO.0.D.pcm', 
+                     'MAF_HUMAN.H11MO.1.B.pcm', 'GATA1_HUMAN.H11MO.1.A.pcm', 'GATA6_HUMAN.H11MO.0.A.pcm', 'GATA4_HUMAN.H11MO.0.A.pcm']; 
+L_nombres_pssm_raton = ['Nkx25', 'Tbx20', 'Meis1', 'Tgif1', 'Hand1', 'Maf', 'Gata1', 'Gata6', 'Gata4']; 
+L_nombres_pssm_humano = ['NKX25', 'TBX20', 'MEIS1', 'TGIF1', 'HAND1', 'MAF', 'GATA1', 'GATA6', 'GATA4']; 
 
 
 #################################### FUNCIONES ####################################
@@ -124,6 +137,9 @@ def _main():
         updown_col_usado = 3; # Columna log(fold change)
         l_translate = [0, hg19]; 
         nom_output = 'anderson_full'; 
+        l_pwm_usado = L_arch_pwm_humano; 
+        l_nom_pwm_usado = L_nombres_pssm_humano; 
+        path_pwm_usado = path_pwm_human; 
     elif organism.lower()=='mouse' or organism.lower()=='raton':
         pssm_usado = abrir_pssm(nom_pssm_nkx25_mouse, path_arch=path_pwm_mouse); 
         genoma_usado = mm9; 
@@ -134,6 +150,9 @@ def _main():
         updown_col_usado = 2; # Columna log(fold change)
         l_translate = []; 
         nom_output = 'dupays_full'; 
+        l_pwm_usado = L_arch_pwm_raton; 
+        l_nom_pwm_usado = L_nombres_pssm_raton; 
+        path_pwm_usado = path_pwm_mouse; 
     else:
         print('Organismo ' + str(organism) + ' no reconocido.')
         return ''
@@ -149,13 +168,18 @@ def _main():
         nom_fasta_out = nom_input_meme_chip+'_fasta_filt_updown'; 
         l_filt_usado = [[7, '0']]; 
         default_filt = False; 
-        M_sitios_filt = pipeline_meme_chip(nom_input_meme_chip, nom_fasta_out, nom_genoma_usado, largo_sitios=1500, l_filt=l_filt_usado, default_pass_filt=default_filt, 
+        M_sitios_filt = pipeline_meme_chip(nom_input_meme_chip, nom_fasta_out, nom_genoma_usado, largo_sitios=largo_memechip, l_filt=l_filt_usado, default_pass_filt=default_filt, 
                                            path_sitios=path_out_main, path_out=path_out_main, path_fasta=path_fasta_main); 
 
     if correr_otros_tf:
-        pass
+        nom_input_otros_tf = nom_output+'_sitios_union'; 
+        nom_genes_otros_tf = nom_output+'_genes'; 
+        nom_out_otros_tf = nom_input_otros_tf + '_otros_tf'; 
+        path_input_otros_tf = path_out_main; 
+        _ = pipeline_otros_tf(nom_input_otros_tf, nom_genes_otros_tf, nom_out_otros_tf, nom_genoma_usado, l_pwm_usado, dist_sitios=dist_otros_tf, dist_max_gen=dist_max_main_otros_tf, 
+                              path_sitios=path_input_otros_tf, path_genes=path_input_otros_tf, path_out=path_out_main, path_fasta=path_fasta_main, path_pwm=path_pwm_usado); 
         ### FALTA
-        # Scripts para otros TF
+        # Ver que output se usa
         ###
 
     return ''
@@ -329,11 +353,25 @@ def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_s
     return M_sitios_filt
 
 
-def pipeline_otros_tf():
-    '''Pipeline para buscar sitios de union de otros TF cerca de sitios de union generados por pipeline_generador()'''
+def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist_sitios=1000, path_sitios='', path_genes='', path_out='', path_fasta='', path_pwm='', dist_max_gen=1000000):
+    '''Pipeline para buscar sitios de union de otros TF cerca de sitios de union generados por pipeline_generador() y sus genes cercanos.
+    nom_sitios y nom_genes son nombres de archivos generados por pipeline_generador(), ubicados en path_sitios y path_genes, respectivamente.
+    nom_sitios es el nombre del archivo con los sitios y/o peaks de NKX2-5.
+    nom_genes es el nombre del archivo con los genes cerca de sitios de NKX2-5 confirmados por RNA-seq.
+    nom_out es la base del nombre de todos los archivos de output, que seran generados en la carpeta path_out.
+    nombre_genoma es el nombre del genoma (hg19 o mm9), es utilizado para obtener secuencias de ADN de los archivos .fasta en la carpeta path_fasta.
+    l_pwm es una lista de nombres de archivos con matrices de pesos para sitios de union de factores de transcripcion buscados. Los archivos se encuentran en path_pwm.
+    dist_sitios es la distancia desde cada sitio en nom_sitios al sitio de cada factor de transcripcion buscado. Si es menor o igual a 0, se busca dentro de cada sitio (usar para peaks ChIP-seq).
+    dist_max_gen es la distancia maxima al +1 de genes en nom_genes. Si es menor o igual a 0, se busca dentro de cada sitio (no tiene uso practico, pero sigue las mismas reglas de dist_sitios).'''
 
+    # Inicializo la lista de matrices de peso
+    l_pssm = []; 
+    # Extraigo la lista de factores de transcripcion de l_pwm
+    for i in range(len(l_pwm)):
+        curr_nom_pwm = l_pwm[i]; 
+        # Abro la matriz del factor actual y la guardo en l_pssm
+        l_pssm.append(abrir_pssm(curr_nom_pwm, path_arch=path_pwm, solo_pssm=True)); 
     ### FALTA
-    # Agarrar lista de TFs
     # Buscar alrededor de sitios de union y/o adentro de peaks
     # Guardar en archivo .csv
     ###
