@@ -176,7 +176,8 @@ def _main():
         nom_genes_otros_tf = nom_output+'_genes'; 
         nom_out_otros_tf = nom_input_otros_tf + '_otros_tf'; 
         path_input_otros_tf = path_out_main; 
-        _ = pipeline_otros_tf(nom_input_otros_tf, nom_genes_otros_tf, nom_out_otros_tf, nom_genoma_usado, l_pwm_usado, dist_sitios=dist_otros_tf, dist_max_gen=dist_max_main_otros_tf, 
+        _ = pipeline_otros_tf(nom_input_otros_tf, nom_genes_otros_tf, nom_out_otros_tf, nom_genoma_usado, l_pwm_usado, dist_sitios=dist_otros_tf, 
+                              dist_max_gen=dist_max_main_otros_tf, l_nom_pwm=l_nom_pwm_usado, 
                               path_sitios=path_input_otros_tf, path_genes=path_input_otros_tf, path_out=path_out_main, path_fasta=path_fasta_main, path_pwm=path_pwm_usado); 
         ### FALTA
         # Ver que output se usa
@@ -353,7 +354,7 @@ def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_s
     return M_sitios_filt
 
 
-def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist_sitios=1000, path_sitios='', path_genes='', path_out='', path_fasta='', path_pwm='', dist_max_gen=1000000):
+def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist_sitios=1000, path_sitios='', path_genes='', path_out='', path_fasta='', path_pwm='', dist_max_gen=1000000, l_nom_pwm=[]):
     '''Pipeline para buscar sitios de union de otros TF cerca de sitios de union generados por pipeline_generador() y sus genes cercanos.
     nom_sitios y nom_genes son nombres de archivos generados por pipeline_generador(), ubicados en path_sitios y path_genes, respectivamente.
     nom_sitios es el nombre del archivo con los sitios y/o peaks de NKX2-5.
@@ -361,6 +362,7 @@ def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist
     nom_out es la base del nombre de todos los archivos de output, que seran generados en la carpeta path_out.
     nombre_genoma es el nombre del genoma (hg19 o mm9), es utilizado para obtener secuencias de ADN de los archivos .fasta en la carpeta path_fasta.
     l_pwm es una lista de nombres de archivos con matrices de pesos para sitios de union de factores de transcripcion buscados. Los archivos se encuentran en path_pwm.
+    l_nom_pwm es una lista de nombres para las columnas de archivos de output
     dist_sitios es la distancia desde cada sitio en nom_sitios al sitio de cada factor de transcripcion buscado. Si es menor o igual a 0, se busca dentro de cada sitio (usar para peaks ChIP-seq).
     dist_max_gen es la distancia maxima al +1 de genes en nom_genes. Si es menor o igual a 0, se busca dentro de cada sitio (no tiene uso practico, pero sigue las mismas reglas de dist_sitios).'''
 
@@ -371,14 +373,59 @@ def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist
         curr_nom_pwm = l_pwm[i]; 
         # Abro la matriz del factor actual y la guardo en l_pssm
         l_pssm.append(abrir_pssm(curr_nom_pwm, path_arch=path_pwm, solo_pssm=True)); 
+    # Extraigo los sitios de union o peaks de nom_sitios con abrir_csv()
+    M_sitios = abrir_csv(nom_sitios, path_arch=path_sitios); 
+    # Extraigo la lista de genes de nom_genes con abrir_csv()
+    M_genes = abrir_csv(nom_genes, path_arch=path_genes); 
+    ### Display
+    n_sitios = len(M_sitios); 
+    ###
+    # Obtengo la secuencia de todos los archivos fasta del genoma con elementos SeqIO
+    dict_chr_n = seqio_chr_n(M_sitios, nombre_genoma, path_fasta); 
+    # Recorro M_sitios
+    for i in range(n_sitios):
+        curr_sitio = M_sitios[i]; 
+        # Defino chr_n, pos_ini y pos_end del sitio, considerando dist_sitios
+        chr_n = curr_sitio[0]; 
+        if dist_sitios>0:
+            pos_ini = int(curr_sitio[1])-dist_sitios; 
+            pos_end = int(curr_sitio[2])+dist_sitios; 
+        else:
+            pos_ini = int(curr_sitio[1]); 
+            pos_end = int(curr_sitio[2]); 
+        seq_rango = secuencia_peak(dict_chr_n[chr_n], pos_ini, pos_end); 
+        # Uso la funcion buscar_sitios_genes_cercanos() para conseguir la lista de genes y sitios de otros TF cercanos
+        M_sitios_otros_tf, L_genes_cerca = buscar_sitios_genes_cercanos(chr_n, int(curr_sitio[1]), int(curr_sitio[2]), M_genes, dist_max_gen, seq_rango, l_pssm, nombre_genoma, path_fasta=path_fasta); 
+        ### FALTA
+        # Agregar info de M_sitios_otros_tf y L_genes_cerca a output
+        # Hacer andar buscar_sitios_genes_cercanos()
+        ###
+        ### Display
+        if ((i+1)%250==0) or i==0:
+            print('Progreso: ' + str(i+1) + ' de ' + str(n_sitios))
+        ###
     ### FALTA
-    # Buscar alrededor de sitios de union y/o adentro de peaks
-    # Guardar en archivo .csv
+    # Guardar outputs en archivos .csv
     ###
     pass
 
 
 ### Funciones principales del pipeline
+
+
+def buscar_sitios_genes_cercanos(chr_n, pos_ini, pos_end, M_genes, dist_genes, seq_rango, l_pssm, nombre_genoma, path_fasta='', t_pssm_score=0.9):
+    '''Recibe un sitio como chr_n, pos_ini, pos_end, busca genes cercanos hasta dist_genes y busca sitios de l_pssm en seq_rango.
+    Devuelve una lista de genes cercanos al sitio y sitios de los tf en l_pssm en seq_rango.
+    t_pssm_score es la fraccion del score maximo posible por el pssm se usa de corte para seleccionar un sitio como hit.'''
+
+    # Inicializo las listas que se devuelven
+    M_sitios_otros_tf = []; 
+    L_genes_cerca = []; 
+    ### FALTA
+    # Recorrer M_genes para buscar genes a dist_genes de pos_ini y pos_end
+    # 
+    ###
+    return M_sitios_otros_tf, L_genes_cerca
 
 
 def genes_cercanos_peak(chr_n, pos_ini, pos_end, dist_max, genoma_ensembl):
@@ -936,8 +983,9 @@ def guardar_matriz(nom_out, M_out, path_out='', ext='.csv', sep=';', l_head=[]):
     return M_out
 
 
-def seqio_chr_n(peaks, nombre_genoma, path_fasta=''):
-    '''Funcion para extraer todos los archivos .fasta de contigs que aparezcan en la matriz de peaks.'''
+def seqio_chr_n(peaks, nombre_genoma, path_fasta='', col_chr_n=0):
+    '''Funcion para extraer todos los archivos .fasta de contigs que aparezcan en la matriz de peaks.
+    col_chr_n permite definir que columna contiene el valor de chr_n en la matriz peaks'''
 
     # Inicializo el diccionario que se devuelve
     dict_out = {}; 
@@ -946,8 +994,8 @@ def seqio_chr_n(peaks, nombre_genoma, path_fasta=''):
     # Recorro peaks
     for i in range(len(peaks)):
         curr_peak = peaks[i]; 
-        # Defino chr_n como curr_peak[0]
-        curr_chr_n = curr_peak[0]; 
+        # Defino chr_n como curr_peak[col_chr_n]
+        curr_chr_n = curr_peak[col_chr_n]; 
         # Si curr_chr_n no esta en L_chr_n, lo agrego
         if not (str(curr_chr_n) in L_chr_n):
             L_chr_n.append(str(curr_chr_n)); 
