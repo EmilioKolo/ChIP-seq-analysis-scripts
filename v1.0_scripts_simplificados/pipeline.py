@@ -380,6 +380,9 @@ def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist
     ### Display
     n_sitios = len(M_sitios); 
     ###
+    # Inicializo las matrices de output
+    M_otros_tf = []; 
+    M_sitios_out = []; 
     # Obtengo la secuencia de todos los archivos fasta del genoma con elementos SeqIO
     dict_chr_n = seqio_chr_n(M_sitios, nombre_genoma, path_fasta); 
     # Recorro M_sitios
@@ -396,6 +399,12 @@ def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist
         seq_rango = secuencia_peak(dict_chr_n[chr_n], pos_ini, pos_end); 
         # Uso la funcion buscar_sitios_genes_cercanos() para conseguir la lista de genes y sitios de otros TF cercanos
         M_sitios_otros_tf, L_genes_cerca = buscar_sitios_genes_cercanos(chr_n, int(curr_sitio[1]), int(curr_sitio[2]), M_genes, dist_max_gen, seq_rango, l_pssm, nombre_genoma, path_fasta=path_fasta); 
+        # Creo un string con la lista de genes cerca
+        str_genes_cerca = ''; 
+        sep=','; 
+        for curr_gen in L_genes_cerca:
+            str_genes_cerca = str_genes_cerca + str(curr_gen) + sep; 
+        str_genes_cerca = str_genes_cerca.rsplit(sep); 
         ### FALTA
         # Agregar info de M_sitios_otros_tf y L_genes_cerca a output
         # Hacer andar buscar_sitios_genes_cercanos()
