@@ -176,12 +176,9 @@ def _main():
         nom_genes_otros_tf = nom_output+'_genes'; 
         nom_out_otros_tf = nom_input_otros_tf + '_otros_tf'; 
         path_input_otros_tf = path_out_main; 
-        _ = pipeline_otros_tf(nom_input_otros_tf, nom_genes_otros_tf, nom_out_otros_tf, nom_genoma_usado, l_pwm_usado, dist_sitios=dist_otros_tf, 
-                              dist_max_gen=dist_max_main_otros_tf, l_nom_pwm=l_nom_pwm_usado, 
-                              path_sitios=path_input_otros_tf, path_genes=path_input_otros_tf, path_out=path_out_main, path_fasta=path_fasta_main, path_pwm=path_pwm_usado); 
-        ### FALTA
-        # Ver que output se usa
-        ###
+        M_sitios_out, M_sitios_otros_tf = pipeline_otros_tf(nom_input_otros_tf, nom_genes_otros_tf, nom_out_otros_tf, nom_genoma_usado, l_pwm_usado, dist_sitios=dist_otros_tf, 
+                                                            dist_max_gen=dist_max_main_otros_tf, l_nom_pwm=l_nom_pwm_usado, 
+                                                            path_sitios=path_input_otros_tf, path_genes=path_input_otros_tf, path_out=path_out_main, path_fasta=path_fasta_main, path_pwm=path_pwm_usado); 
 
     return ''
 
@@ -354,7 +351,9 @@ def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_s
     return M_sitios_filt
 
 
-def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist_sitios=1000, path_sitios='', path_genes='', path_out='', path_fasta='', path_pwm='', dist_max_gen=1000000, l_nom_pwm=[]):
+def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist_sitios=1000, 
+                      path_sitios='', path_genes='', path_out='', path_fasta='', path_pwm='', 
+                      dist_max_gen=1000000, l_nom_pwm=[], l_head_sitios=[]):
     '''Pipeline para buscar sitios de union de otros TF cerca de sitios de union generados por pipeline_generador() y sus genes cercanos.
     nom_sitios y nom_genes son nombres de archivos generados por pipeline_generador(), ubicados en path_sitios y path_genes, respectivamente.
     nom_sitios es el nombre del archivo con los sitios y/o peaks de NKX2-5.
@@ -376,7 +375,7 @@ def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist
     # Extraigo los sitios de union o peaks de nom_sitios con abrir_csv()
     M_sitios = abrir_csv(nom_sitios, path_arch=path_sitios); 
     # Extraigo la lista de genes de nom_genes con abrir_csv()
-    M_genes = abrir_csv(nom_genes, path_arch=path_genes); 
+    dict_genes = abrir_dict_csv(nom_genes, col_index=1, path_arch=path_genes); 
     ### Display
     n_sitios = len(M_sitios); 
     ###
@@ -398,42 +397,92 @@ def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist
             pos_end = int(curr_sitio[2]); 
         seq_rango = secuencia_peak(dict_chr_n[chr_n], pos_ini, pos_end); 
         # Uso la funcion buscar_sitios_genes_cercanos() para conseguir la lista de genes y sitios de otros TF cercanos
-        M_sitios_otros_tf, L_genes_cerca = buscar_sitios_genes_cercanos(chr_n, int(curr_sitio[1]), int(curr_sitio[2]), M_genes, dist_max_gen, seq_rango, l_pssm, nombre_genoma, path_fasta=path_fasta); 
+        M_sitios_otros_tf, L_genes_cerca = buscar_sitios_genes_cercanos(chr_n, int(curr_sitio[1]), int(curr_sitio[2]), dict_genes, dist_max_gen, seq_rango, l_pssm, l_nom_pwm=l_nom_pwm); 
         # Creo un string con la lista de genes cerca
         str_genes_cerca = ''; 
         sep=','; 
         for curr_gen in L_genes_cerca:
             str_genes_cerca = str_genes_cerca + str(curr_gen) + sep; 
-        str_genes_cerca = str_genes_cerca.rsplit(sep); 
-        ### FALTA
-        # Agregar info de M_sitios_otros_tf y L_genes_cerca a output
-        # Hacer andar buscar_sitios_genes_cercanos()
-        ###
+        str_genes_cerca = str_genes_cerca.rstrip(sep); 
+        # Agrego una columna a M_sitios_out con curr_sitio
+        M_sitios_out.append(curr_sitio[:]); 
+        # Agrego str_genes_cerca al final de M_sitios_out[i]
+        M_sitios_out[i].append(str(str_genes_cerca)); 
+        # Recorro M_sitios_otros_tf
+        for j in range(len(M_sitios_otros_tf)):
+            curr_otro_tf = M_sitios_otros_tf[j]; 
+            # Agrego curr_otro_tf y M_sitios_out[i] a M_otros_tf
+            M_otros_tf.append(curr_otro_tf + M_sitios_out[i]); 
         ### Display
         if ((i+1)%250==0) or i==0:
             print('Progreso: ' + str(i+1) + ' de ' + str(n_sitios))
         ###
-    ### FALTA
-    # Guardar outputs en archivos .csv
-    ###
-    pass
+    # Vacio dict_chr_n despues de usarlo
+    dict_chr_n = {}; 
+    # Defino l_head para las distintas matrices
+    l_head_sitios_out = l_head_sitios + ['str_genes_rnaseq_cerca']; 
+    l_head_otro_tf = ['chr_n_otro_tf', 'pos_ini_otro_tf', 'pos_end_otro_tf', 'seq_union_otro_tf', 'fuente_otro_tf', 'score_otro_tf', 'nom_otro_tf'] + l_head_sitios; 
+    # Guardo las matrices con guardar_matriz()
+    M_sitios_out = guardar_matriz(nom_out+'_sitios_genes', M_sitios_out, path_out=path_out, l_head=l_head_sitios_out); 
+    M_otros_tf = guardar_matriz(nom_out+'_otros_tf', M_otros_tf, path_out=path_out, l_head=l_head_otro_tf); 
+    return M_sitios_out, M_sitios_otros_tf
 
 
 ### Funciones principales del pipeline
 
 
-def buscar_sitios_genes_cercanos(chr_n, pos_ini, pos_end, M_genes, dist_genes, seq_rango, l_pssm, nombre_genoma, path_fasta='', t_pssm_score=0.9):
-    '''Recibe un sitio como chr_n, pos_ini, pos_end, busca genes cercanos hasta dist_genes y busca sitios de l_pssm en seq_rango.
+def buscar_sitios_genes_cercanos(chr_n, pos_ini, pos_end, dict_genes, dist_genes, seq_rango, l_pssm, t_pssm_score=0.9, l_nom_pwm=[]):
+    '''Recibe un sitio como chr_n, pos_ini, pos_end, busca genes cercanos de dict_genes hasta dist_genes y busca sitios de l_pssm en seq_rango.
     Devuelve una lista de genes cercanos al sitio y sitios de los tf en l_pssm en seq_rango.
-    t_pssm_score es la fraccion del score maximo posible por el pssm se usa de corte para seleccionar un sitio como hit.'''
+    t_pssm_score es la fraccion del score maximo posible por el pssm se usa de corte para seleccionar un sitio como hit.
+    Los genes en dict_genes son del formato [ensembl_id, chr_n, pos0, biotype, fold_type].
+    l_nom_pwm es una lista de nombres de los pssm. Tiene que tener el mismo largo que l_pssm, si es mas corto se hace como que es lista vacia, si es mas largo se usa truncada.'''
 
     # Inicializo las listas que se devuelven
     M_sitios_otros_tf = []; 
     L_genes_cerca = []; 
-    ### FALTA
-    # Recorrer M_genes para buscar genes a dist_genes de pos_ini y pos_end
-    # 
-    ###
+    if not (chr_n in dict_genes.keys()):
+        # Veo que chr_n este en dict_genes[chr_n]
+        print('chr_n=' + str(chr_n) + ' no se encontro en dict_genes.keys()')
+        print(dict_genes.keys())
+        return M_sitios_otros_tf, L_genes_cerca
+    # Recorro dict_genes[chr_n]
+    for i in range(len(dict_genes[chr_n])):
+        curr_gen = dict_genes[chr_n][i]; 
+        # Primero veo si el gen tiene fold_change
+        if len(curr_gen)>4 and curr_gen[4]!='':
+            # Defino pos0 del gen
+            pos0 = int(curr_gen[2]); 
+            # Veo si pos0 (curr_gen[2]) esta entre pos_ini-dist_genes y pos_end+dist_genes
+            if (pos0>(pos_ini-dist_genes)) and ((pos_end+dist_genes)>pos0):
+                # Si esta en el rango, se agrega a L_genes_cerca
+                L_genes_cerca.append(curr_gen[0]); 
+    # Recorro l_pssm
+    for i in range(len(l_pssm)):
+        curr_pssm = l_pssm[i]; 
+        # Veo si uso l_nom_pwm
+        if len(l_nom_pwm)>=len(l_pssm):
+            curr_nom_pssm = l_nom_pwm[i]; 
+        else:
+            help(curr_pssm)
+            print(curr_pssm.str)
+            curr_nom_pssm = str(curr_pssm); 
+        # Defino curr_cutoff con t_pssm_score y el score maximo de curr_pssm
+        curr_cutoff = t_pssm_score*curr_pssm.max; 
+        # Busco la lista de sitios de union con sitios_union_pssm()
+        l_su_curr_pssm = sitios_union_pssm(seq_rango, chr_n, curr_pssm, curr_cutoff, pos_ini-1); 
+        # Recorro la lista de sitios de union devueltos
+        for j in range(len(l_su_curr_pssm)):
+            # Cada sitio incluye chr_n, pos_ini, pos_end, seq, fuente="pssm" y score
+            curr_hit = l_su_curr_pssm[j]; 
+            # Inicializo una lista que se agrega a M_sitios_otros_tf
+            l_curr_hit = []; 
+            # Agrego los datos de curr_hit a l_curr_hit
+            l_curr_hit = l_curr_hit + curr_hit; 
+            # Agrego curr_nom_pssm
+            l_curr_hit.append(curr_nom_pssm); 
+            # Agrego l_curr_hit a M_sitios_otros_tf
+            M_sitios_otros_tf.append(l_curr_hit[:]); 
     return M_sitios_otros_tf, L_genes_cerca
 
 
@@ -482,7 +531,8 @@ def sitios_union_lista(seq_peak, chr_n, L_sitios, pos_ini_ref):
 
 def sitios_union_pssm(seq_peak, chr_n, pssm, score_cutoff, pos_ini_ref):
     '''Funcion para encontrar todas las secuencias con puntaje mayor a score_max dentro de seq_peak.
-    Devuelve listas de sitios de union, donde cada sitio incluye chr_n, pos_ini, pos_end, seq, fuente="pssm" y score (ver si agrego algo mas).'''
+    Devuelve listas de sitios de union.
+    Cada sitio incluye chr_n, pos_ini, pos_end, seq, fuente="pssm" y score (actualizar si agrego algo mas).'''
 
     # Inicializo la lista de sitios de union que se devuelve
     L_su = []; 
@@ -766,12 +816,55 @@ def abrir_csv(nom_arch, path_arch='', sep=';', ext='.csv', con_headers=True, dev
             else:
                 # Transformo la linea en lista
                 l_line = curr_line.rstrip().split(sep=sep); 
-                # Cargo L_line en M_out
+                # Cargo l_line en M_out
                 M_out.append(l_line[:]); 
     # Si devolver_header es True, se devuelve M_out y l_head
     if devolver_header:
         return M_out, l_head
     return M_out
+
+
+def abrir_dict_csv(nom_arch, col_index=0, path_arch='', sep=';', ext='.csv', con_headers=True, devolver_header=False):
+    '''Abre archivos .csv y devuelve un diccionario con listas de listas con las filas.
+    col_index define la columna en la que se encuentra el ID del diccionario.
+    con_headers define si hay header (se ignora por defecto).
+    devolver_header permite devolver el header como segundo output'''
+
+    # Inicializo el diccionario que se devuelve
+    dict_out = {}; 
+    # Inicializo booleano y lista de headers
+    header = con_headers; 
+    l_head = []; 
+    # Defino la direccion del archivo con nom_arch y path_arch
+    if path_arch=='':
+        filepath = nom_arch + ext; 
+    else:
+        filepath = os.path.join(path_arch, nom_arch + ext); 
+    # Abro el archivo filepath
+    with open(filepath, 'r') as f_out:
+        print('Archivo ' + nom_arch + ' abierto.') 
+        # Recorro cada fila
+        for curr_line in f_out.readlines():
+            # Veo si tengo que pasar el header
+            if header:
+                # Transformo la linea en lista
+                l_head = curr_line.rstrip().split(sep=sep); 
+                # Paso header a False para no ver la proxima linea
+                header = False; 
+            else:
+                # Transformo la linea en lista
+                l_line = curr_line.rstrip().split(sep=sep); 
+                # Defino curr_index
+                curr_index = l_line[col_index]; 
+                # Veo si l_line[col_index] ya esta en dict_out.keys()
+                if not (curr_index in dict_out.keys()):
+                    dict_out[curr_index] = []; 
+                # Cargo l_line en dict_out[col_index]
+                dict_out[curr_index].append(l_line[:]); 
+    # Si devolver_header es True, se devuelve M_out y l_head
+    if devolver_header:
+        return dict_out, l_head
+    return dict_out
 
 
 def abrir_pssm(nom_arch, path_arch='', solo_pssm=True, pseudocounts=0.5):
