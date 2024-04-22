@@ -96,19 +96,20 @@ path_pwm_mouse = path_git_main + 'PWM_mouse\\';
 
 # Variables para pipelines
 
+organism = 'mouse'; # human o mouse
+
 correr_generador = False; 
 dist_max_main = 1000000; 
 L_confirmados = ['GCAAGTG', 'GGAAGTG', 'GAAAGTG', 'ATAAGTG', 'GTAAGTG', 'CTAAGTG', 'TCAAGTG', 'TGAAGTG', 'TAAAGTG', 'TTAAGTG']; 
 nom_pssm_nkx25_human = 'NKX25_HUMAN.H11MO.0.B.pcm'; 
 nom_pssm_nkx25_mouse = 'NKX25_MOUSE.H11MO.0.A.pcm'; 
 score_mult = 0.9; # Multiplicador del score maximo de pssm que se usa como cutoff
-organism = 'human'; # human o mouse
 test_used = 0; # 0 para correr todo completo, numeros mayores a 0 para correr subsets de largo test_used
 
-correr_memechip = False; 
+correr_memechip = True; 
 largo_memechip = 1500; 
 
-correr_otros_tf = True; 
+correr_otros_tf = False; 
 dist_otros_tf = 1000; 
 dist_max_main_otros_tf = 1000000; 
 
@@ -165,9 +166,10 @@ def _main():
 
     if correr_memechip:
         nom_input_meme_chip = nom_output+'_sitios_union'; 
-        nom_fasta_out = nom_input_meme_chip+'_fasta_filt_updown'; 
-        l_filt_usado = [[7, '0']]; 
-        default_filt = False; 
+        nom_fasta_out = nom_input_meme_chip+'_fasta_nofilt_updown'; 
+        #l_filt_usado = [[7, '0']]; 
+        l_filt_usado = []; 
+        default_filt = len(l_filt_usado)!=0; 
         M_sitios_filt = pipeline_meme_chip(nom_input_meme_chip, nom_fasta_out, nom_genoma_usado, largo_sitios=largo_memechip, l_filt=l_filt_usado, default_pass_filt=default_filt, 
                                            path_sitios=path_out_main, path_out=path_out_main, path_fasta=path_fasta_main); 
 
