@@ -44,26 +44,7 @@ mm10 = EnsemblRelease(102, species='mouse');
 
 
 '''
-### FALTA
-# X Agregar info de genes cercanos a peaks y sitios de union
-# X Abrir resultados RNAseq
-# X Seleccionar genes RNAseq
-    # * Ver en 9-ClasificacionPeaks3.py, 8-TraduccionRatonHumano.py, 8-ConteoGenesDupaysRNAseq.py y 7-ClasificacionPeaks2.py
-    # X Extraer genes RNAseq
-    # X Pasarlos a ID de Ensembl
-    # X Seleccionar genes en M_genes por lista RNAseq y agregar columna
-    # X Agregar info de updown a M_genes
-# X Generar secuencias para MEME-ChIP
-    # * Ver 4-GeneracionFastaMEME.py en Scripts_0_16
-    # X Abrir archivos de output_git (peaks o sitios de union?)
-    # X Seleccionar sitios/peaks
-    # X Unificar largos (ver en scripts)
-    # X Obtener secuencias (ver en scripts)
-    # X Guardar en archivo .fasta (ver en scripts)
-    # X Testear que pipeline_meme_chip() ande
-# Agregar cosas relacionadas a estudiar varios factores de transcripcion
-# Correr scripts MEME-ChIP para generar resultados (capaz no es necesario)
-###
+Funciones de trabajo con resultados de ChIP-seq y RNA-seq
 '''
 
 
@@ -96,10 +77,10 @@ path_pwm_mouse = path_git_main + 'PWM_mouse\\';
 
 # Variables para pipelines
 
-organism = 'mouse'; # human o mouse
+organism = 'human'; # human o mouse
 
-correr_generador = False; 
-dist_max_main = 1000000; 
+correr_generador = True; 
+dist_max_main = 500000; 
 L_confirmados = ['GCAAGTG', 'GGAAGTG', 'GAAAGTG', 'ATAAGTG', 'GTAAGTG', 'CTAAGTG', 'TCAAGTG', 'TGAAGTG', 'TAAAGTG', 'TTAAGTG']; 
 nom_pssm_nkx25_human = 'NKX25_HUMAN.H11MO.0.B.pcm'; 
 nom_pssm_nkx25_mouse = 'NKX25_MOUSE.H11MO.0.A.pcm'; 
@@ -109,9 +90,9 @@ test_used = 0; # 0 para correr todo completo, numeros mayores a 0 para correr su
 correr_memechip = True; 
 largo_memechip = 1500; 
 
-correr_otros_tf = False; 
+correr_otros_tf = True; 
 dist_otros_tf = 1000; 
-dist_max_main_otros_tf = 1000000; 
+dist_max_main_otros_tf = 500000; 
 
 # Listas otros TFs
 L_arch_pwm_raton = ['NKX25_MOUSE.H11MO.0.A.pcm', 'TBX20_MOUSE.H11MO.0.C.pcm', 'MEIS1_MOUSE.H11MO.1.A.pcm', 'TGIF1_MOUSE.H11MO.0.A.pcm', 
