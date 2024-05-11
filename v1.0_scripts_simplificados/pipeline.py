@@ -45,6 +45,18 @@ mm10 = EnsemblRelease(102, species='mouse');
 
 '''
 Funciones de trabajo con resultados de ChIP-seq y RNA-seq
+
+pipeline_generador() 
+Genera archivos con picos de ChIP-seq, sitios de union y genes cerca de los picos/sitios de union. 
+Toma inputs de archivos .bed para ChIP-seq y de .csv para RNA-seq
+
+pipeline_meme_chip() 
+Genera archivos con secuencias en formato .fasta para mandar a MEME-ChIP. 
+Toma inputs de pipeline_generador()
+
+pipeline_otros_tf()
+Genera archivos con sitios de union de varios tf cerca de sitios de union de pipeline_generador()
+Toma inputs de pipeline_generador()
 '''
 
 
@@ -79,7 +91,7 @@ path_pwm_mouse = path_git_main + 'PWM_mouse\\';
 
 organism = 'human'; # human o mouse
 
-correr_generador = False; 
+correr_generador = True; 
 dist_max_main = 100000; 
 L_confirmados = ['GCAAGTG', 'GGAAGTG', 'GAAAGTG', 'ATAAGTG', 'GTAAGTG', 'CTAAGTG', 'TCAAGTG', 'TGAAGTG', 'TAAAGTG', 'TTAAGTG']; 
 nom_pssm_nkx25_human = 'NKX25_HUMAN.H11MO.0.B.pcm'; 
@@ -90,7 +102,7 @@ test_used = 0; # 0 para correr todo completo, numeros mayores a 0 para correr su
 correr_memechip = True; 
 largo_memechip = 1500; 
 
-correr_otros_tf = False; 
+correr_otros_tf = True; 
 dist_otros_tf = 1000; 
 dist_max_main_otros_tf = 100000; 
 
