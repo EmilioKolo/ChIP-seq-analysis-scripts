@@ -79,8 +79,8 @@ path_pwm_mouse = path_git_main + 'PWM_mouse\\';
 
 organism = 'human'; # human o mouse
 
-correr_generador = True; 
-dist_max_main = 500000; 
+correr_generador = False; 
+dist_max_main = 100000; 
 L_confirmados = ['GCAAGTG', 'GGAAGTG', 'GAAAGTG', 'ATAAGTG', 'GTAAGTG', 'CTAAGTG', 'TCAAGTG', 'TGAAGTG', 'TAAAGTG', 'TTAAGTG']; 
 nom_pssm_nkx25_human = 'NKX25_HUMAN.H11MO.0.B.pcm'; 
 nom_pssm_nkx25_mouse = 'NKX25_MOUSE.H11MO.0.A.pcm'; 
@@ -90,9 +90,9 @@ test_used = 0; # 0 para correr todo completo, numeros mayores a 0 para correr su
 correr_memechip = True; 
 largo_memechip = 1500; 
 
-correr_otros_tf = True; 
+correr_otros_tf = False; 
 dist_otros_tf = 1000; 
-dist_max_main_otros_tf = 500000; 
+dist_max_main_otros_tf = 100000; 
 
 # Listas otros TFs
 L_arch_pwm_raton = ['NKX25_MOUSE.H11MO.0.A.pcm', 'TBX20_MOUSE.H11MO.0.C.pcm', 'MEIS1_MOUSE.H11MO.1.A.pcm', 'TGIF1_MOUSE.H11MO.0.A.pcm', 
