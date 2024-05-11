@@ -119,7 +119,7 @@ L_nombres_pssm_humano = ['NKX25', 'TBX20', 'MEIS1', 'TGIF1', 'HAND1', 'MAF', 'GA
 
 
 def _main():
-    '''Funcion para probar scripts en ejecucion del archivo'''
+    '''Funcion para correr scripts en ejecucion del archivo'''
 
     if organism.lower()=='human' or organism.lower()=='humano':
         pssm_usado = abrir_pssm(nom_pssm_nkx25_human, path_arch=path_pwm_human); 
