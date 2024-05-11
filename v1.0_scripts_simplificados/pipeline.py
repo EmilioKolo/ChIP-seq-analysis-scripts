@@ -150,7 +150,7 @@ def _main():
         nom_fasta_out = nom_input_meme_chip+'_fasta_nofilt_updown'; 
         #l_filt_usado = [[7, '0']]; 
         l_filt_usado = []; 
-        default_filt = len(l_filt_usado)!=0; 
+        default_filt = len(l_filt_usado)==0; 
         M_sitios_filt = pipeline_meme_chip(nom_input_meme_chip, nom_fasta_out, nom_genoma_usado, largo_sitios=largo_memechip, l_filt=l_filt_usado, default_pass_filt=default_filt, 
                                            path_sitios=path_out_main, path_out=path_out_main, path_fasta=path_fasta_main); 
 
