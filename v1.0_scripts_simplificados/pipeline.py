@@ -727,6 +727,26 @@ def secuencia_peak(record_seq, pos_ini, pos_end):
     return seq_out
 
 
+def sign(n, zero=0, nan=0):
+    '''Funcion signo, hecha a mano porque python no la tiene.
+    zero es el valor que se devuelve si n==0.
+    nan es el valor que se devuelve si n no es un numero.'''
+    # Inicializo el valor que se devuelve
+    ret = ''; 
+    # Uso try para que se rompa si n no es un numero
+    try:
+        # Veo si n es igual a 0
+        if n==0:
+            ret = zero; 
+        else:
+            # Si n no es igual a cero, uso esta funcion para evitar if/else
+            ret = (int(n>0)*2)-1; 
+    except:
+        # Si n no es un numero, devuelvo nan
+        ret = nan; 
+    return ret
+
+
 def unificar_largos(pos_ini, pos_end, largo_final):
     '''Recibe ints con una posicion inicial y una posicion final y devuelve un rango con largo largo_final.
     Asume que pos_ini es menor a pos_end y que largo_final es mayor a 0. Puede ser que funcione de todas formas (no testeado)
@@ -1115,26 +1135,6 @@ def seqio_chr_n(peaks, nombre_genoma, path_fasta='', col_chr_n=0):
         except:
             print('ERROR: chr_n ' + str(chr_n) + ' no se pudo abrir. nom_fasta: ' + str(nom_fasta) + ' ; path_fasta: ' + str(path_fasta))
     return dict_out
-
-
-def sign(n, zero=0, nan=0):
-    '''Funcion signo, hecha a mano porque python no la tiene.
-    zero es el valor que se devuelve si n==0.
-    nan es el valor que se devuelve si n no es un numero.'''
-    # Inicializo el valor que se devuelve
-    ret = ''; 
-    # Uso try para que se rompa si n no es un numero
-    try:
-        # Veo si n es igual a 0
-        if n==0:
-            ret = zero; 
-        else:
-            # Si n no es igual a cero, uso esta funcion para evitar if/else
-            ret = (int(n>0)*2)-1; 
-    except:
-        # Si n no es un numero, devuelvo nan
-        ret = nan; 
-    return ret
 
 
 #################################### RESULTADOS ###################################
