@@ -91,7 +91,7 @@ path_pwm_mouse = path_git_main + 'PWM_mouse\\';
 
 organism = 'human'; # human o mouse
 
-correr_generador = True; 
+correr_generador = False; 
 dist_max_main = 100000; 
 L_confirmados = ['GCAAGTG', 'GGAAGTG', 'GAAAGTG', 'ATAAGTG', 'GTAAGTG', 'CTAAGTG', 'TCAAGTG', 'TGAAGTG', 'TAAAGTG', 'TTAAGTG']; 
 nom_pssm_nkx25_human = 'NKX25_HUMAN.H11MO.0.B.pcm'; 
@@ -99,7 +99,7 @@ nom_pssm_nkx25_mouse = 'NKX25_MOUSE.H11MO.0.A.pcm';
 score_mult = 0.9; # Multiplicador del score maximo de pssm que se usa como cutoff
 test_used = 0; # 0 para correr todo completo, numeros mayores a 0 para correr subsets de largo test_used
 
-correr_memechip = True; 
+correr_memechip = False; 
 largo_memechip = 1500; 
 
 correr_otros_tf = True; 
@@ -158,13 +158,15 @@ def _main():
                                                     L_su=L_confirmados, test_mode=test_used, id_col_rnaseq=id_col_usado, updown_col_rnaseq=updown_col_usado, l_translate=l_translate); 
 
     if correr_memechip:
-        nom_input_meme_chip = nom_output+'_sitios_union'; 
-        nom_fasta_out = nom_input_meme_chip+'_fasta_nofilt_updown'; 
+        path_input_memechip = path_out_main + '100kpb\\'; 
+        path_output_memechip = path_out_main + '100kpb\\'; 
+        nom_input_meme_chip = nom_output+'_peaks'; 
+        nom_fasta_out = nom_input_meme_chip+'_fasta_nofilt_total'; 
         #l_filt_usado = [[7, '0']]; 
         l_filt_usado = []; 
         default_filt = len(l_filt_usado)==0; 
         M_sitios_filt = pipeline_meme_chip(nom_input_meme_chip, nom_fasta_out, nom_genoma_usado, largo_sitios=largo_memechip, l_filt=l_filt_usado, default_pass_filt=default_filt, 
-                                           path_sitios=path_out_main, path_out=path_out_main, path_fasta=path_fasta_main); 
+                                           path_sitios=path_input_memechip, path_out=path_output_memechip, path_fasta=path_fasta_main); 
 
     if correr_otros_tf:
         nom_input_otros_tf = nom_output+'_sitios_union'; 
@@ -306,14 +308,16 @@ def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_s
         for i in range(len(M_sitios_filt)): 
             # curr_sitio tiene formato (chr_n, pos_ini, pos_end), con pos_ini y pos_end posiblemente registrados como str
             curr_sitio = M_sitios_filt[i]; 
-            # Defino pos_ini y pos_end
-            pos_ini = min(int(curr_sitio[1]), int(curr_sitio[2])); 
-            pos_end = max(int(curr_sitio[1]), int(curr_sitio[2])); 
-            # Creo sitio_largo_unificado con unificar_largos()
-            sitio_largo_unificado = unificar_largos(pos_ini, pos_end, largo_sitios); 
-            # Asigno los valores de sitio_largo_unificado a M_sitios_filt[i]
-            M_sitios_filt[i][1] = sitio_largo_unificado[0]; 
-            M_sitios_filt[i][2] = sitio_largo_unificado[1]; 
+            # Para eliminar espacios vacios al fondo del archivo
+            if curr_sitio[0]!='':
+                # Defino pos_ini y pos_end
+                pos_ini = min(int(curr_sitio[1]), int(curr_sitio[2])); 
+                pos_end = max(int(curr_sitio[1]), int(curr_sitio[2])); 
+                # Creo sitio_largo_unificado con unificar_largos()
+                sitio_largo_unificado = unificar_largos(pos_ini, pos_end, largo_sitios); 
+                # Asigno los valores de sitio_largo_unificado a M_sitios_filt[i]
+                M_sitios_filt[i][1] = sitio_largo_unificado[0]; 
+                M_sitios_filt[i][2] = sitio_largo_unificado[1]; 
     ### Display
     print('# Iniciando extraccion de secuencias')
     ###
@@ -326,16 +330,18 @@ def pipeline_meme_chip(nom_sitios, nom_out, nombre_genoma, largo_sitios=0, col_s
     # Recorro M_sitios_filt
     for i in range(len_sitios_filt): 
         curr_sitio = M_sitios_filt[i]; 
-        # Defino seq de curr_sitio
-        seq_peak = secuencia_peak(dict_chr_n[curr_sitio[0]], int(curr_sitio[1]), int(curr_sitio[2])); 
-        # Defino id_dict
-        id_dict = str(i+1) + '_' + str(curr_sitio[0]) + '_' + str(curr_sitio[1]) + '_' + str(curr_sitio[2]); 
-        # Agrego seq_peak a dict_fasta
-        dict_fasta[id_dict] = str(seq_peak); 
-        ### Display
-        if ((i+1)%1000==0) or (i==0):
-            print('Progreso: ' + str(i+1) + ' de ' + str(len_sitios_filt))
-        ###
+        # Veo que curr_sitio[0] este en dict_chr_n.keys()
+        if curr_sitio[0] in dict_chr_n.keys():
+            # Defino seq de curr_sitio
+            seq_peak = secuencia_peak(dict_chr_n[curr_sitio[0]], int(curr_sitio[1]), int(curr_sitio[2])); 
+            # Defino id_dict
+            id_dict = str(i+1) + '_' + str(curr_sitio[0]) + '_' + str(curr_sitio[1]) + '_' + str(curr_sitio[2]); 
+            # Agrego seq_peak a dict_fasta
+            dict_fasta[id_dict] = str(seq_peak); 
+            ### Display
+            if ((i+1)%1000==0) or (i==0):
+                print('Progreso: ' + str(i+1) + ' de ' + str(len_sitios_filt))
+            ###
     # Vacio dict_chr_n despues de usarlo
     dict_chr_n = {}; 
     ### Display
