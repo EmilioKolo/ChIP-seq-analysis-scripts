@@ -105,6 +105,7 @@ largo_memechip = 1500;
 correr_otros_tf = True; 
 dist_otros_tf = 1000; 
 dist_max_main_otros_tf = 100000; 
+nom_ref_otros_tf = '_sitios_union'; # _sitios_union o _peaks
 
 # Listas otros TFs (VIEJAS)
 L_arch_pwm_raton = ['NKX25_MOUSE.H11MO.0.A.pcm', 'TBX20_MOUSE.H11MO.0.C.pcm', 'MEIS1_MOUSE.H11MO.1.A.pcm', 'TGIF1_MOUSE.H11MO.0.A.pcm', 
@@ -174,7 +175,7 @@ def _main():
                                            path_sitios=path_input_memechip, path_out=path_output_memechip, path_fasta=path_fasta_main); 
 
     if correr_otros_tf:
-        nom_input_otros_tf = nom_output+'_sitios_union'; 
+        nom_input_otros_tf = nom_output+nom_ref_otros_tf; 
         nom_genes_otros_tf = nom_output+'_genes'; 
         nom_out_otros_tf = nom_input_otros_tf + '_otros_tf'; 
         path_input_otros_tf = path_out_main + '100kpb\\'; 
@@ -378,8 +379,6 @@ def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist
         curr_nom_pwm = l_pwm[i]; 
         # Abro la matriz del factor actual y la guardo en l_pssm
         l_pssm.append(abrir_pssm(curr_nom_pwm, path_arch=path_pwm, solo_pssm=True)); 
-    # Inicializo una lista de otros factores de transcripcion (HARDCODEADO, actualizar a mano si cambia la lista de l_pssm)
-    l_otros_tf_pssm = ['NKX25', 'TBX20', 'MEIS1', 'TGIF1', 'MAF', 'HAND1', 'GATA1', 'GATA6', 'GATA4']; 
     # Extraigo los sitios de union o peaks de nom_sitios con abrir_csv()
     M_sitios, l_head_sitios_in = abrir_csv(nom_sitios, path_arch=path_sitios, con_headers=True, devolver_header=True); 
     # Extraigo la lista de genes de nom_genes con abrir_csv()
@@ -403,34 +402,36 @@ def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist
         else:
             pos_ini = int(curr_sitio[1]); 
             pos_end = int(curr_sitio[2]); 
-        # Extraigo la secuencia del rango definido con la funcion secuencia_peak()
-        seq_rango = secuencia_peak(dict_chr_n[chr_n], pos_ini, pos_end); 
-        # Uso la funcion buscar_sitios_genes_cercanos() para conseguir la lista de genes y sitios de otros TF cercanos
-        M_sitios_otros_tf, M_genes_cerca = buscar_sitios_genes_cercanos(chr_n, int(curr_sitio[1]), int(curr_sitio[2]), dict_genes, dist_max_gen, seq_rango, l_pssm, l_nom_pwm=l_nom_pwm); 
-        # Creo un string con la lista de genes cerca
-        str_genes_cerca = ''; 
-        sep=','; 
-        for curr_gen in M_genes_cerca:
-            str_genes_cerca = str_genes_cerca + str(curr_gen[0]) + '_' + str(curr_gen[1]) + sep; 
-        str_genes_cerca = str_genes_cerca.rstrip(sep); 
-        # Agrego una columna a M_sitios_out con curr_sitio
-        M_sitios_out.append(curr_sitio[:]); 
-        # Agrego str_genes_cerca al final de M_sitios_out[i]
-        M_sitios_out[i].append(str(str_genes_cerca)); 
-        # Inicializo una lista de otros factores de transcripcion para registrar los sitios de union cerca de curr_sitio
-        l_otros_tf = [0]*len(l_otros_tf_pssm); 
-        # Recorro M_sitios_otros_tf
-        for j in range(len(M_sitios_otros_tf)):
-            curr_otro_tf = M_sitios_otros_tf[j]; 
-            # Agrego curr_otro_tf y M_sitios_out[i] a M_otros_tf
-            M_otros_tf.append(curr_otro_tf + M_sitios_out[i]); 
-            # Anoto el tf actual en l_otros_tf
-            if curr_otro_tf[6] in l_otros_tf_pssm:
-                l_otros_tf[l_otros_tf_pssm.index(curr_otro_tf[6])]=1; 
-            else:
-                print('ERROR: sitio otro tf no encontrado en l_otros_tf_pssm. Lista del sitio: ' + str(curr_otro_tf))
-        # Agrego l_otros_tf a M_sitios_out[i]
-        M_sitios_out[i] = M_sitios_out[i] + l_otros_tf; 
+        # Veo si chr_n esta en dict_chr_n.keys()
+        if chr_n in dict_chr_n.keys():
+            # Extraigo la secuencia del rango definido con la funcion secuencia_peak()
+            seq_rango = secuencia_peak(dict_chr_n[chr_n], pos_ini, pos_end); 
+            # Uso la funcion buscar_sitios_genes_cercanos() para conseguir la lista de genes y sitios de otros TF cercanos
+            M_sitios_otros_tf, M_genes_cerca = buscar_sitios_genes_cercanos(chr_n, int(curr_sitio[1]), int(curr_sitio[2]), dict_genes, dist_max_gen, seq_rango, l_pssm, l_nom_pwm=l_nom_pwm); 
+            # Creo un string con la lista de genes cerca
+            str_genes_cerca = ''; 
+            sep=','; 
+            for curr_gen in M_genes_cerca:
+                str_genes_cerca = str_genes_cerca + str(curr_gen[0]) + '_' + str(curr_gen[1]) + sep; 
+            str_genes_cerca = str_genes_cerca.rstrip(sep); 
+            # Agrego una columna a M_sitios_out con curr_sitio
+            M_sitios_out.append(curr_sitio[:]); 
+            # Agrego str_genes_cerca al final de M_sitios_out[i]
+            M_sitios_out[i].append(str(str_genes_cerca)); 
+            # Inicializo una lista de otros factores de transcripcion para registrar los sitios de union cerca de curr_sitio
+            l_otros_tf = [0]*len(l_nom_pwm); 
+            # Recorro M_sitios_otros_tf
+            for j in range(len(M_sitios_otros_tf)):
+                curr_otro_tf = M_sitios_otros_tf[j]; 
+                # Agrego curr_otro_tf y M_sitios_out[i] a M_otros_tf
+                M_otros_tf.append(curr_otro_tf + M_sitios_out[i]); 
+                # Anoto el tf actual en l_otros_tf
+                if curr_otro_tf[6] in l_nom_pwm:
+                    l_otros_tf[l_nom_pwm.index(curr_otro_tf[6])]=1; 
+                else:
+                    print('ERROR: sitio otro tf no encontrado en l_nom_pwm. Lista del sitio: ' + str(curr_otro_tf))
+            # Agrego l_otros_tf a M_sitios_out[i]
+            M_sitios_out[i] = M_sitios_out[i] + l_otros_tf; 
         ### Display
         if ((i+1)%250==0) or i==0:
             print('Progreso: ' + str(i+1) + ' de ' + str(n_sitios))
@@ -438,7 +439,7 @@ def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist
     # Vacio dict_chr_n despues de usarlo
     dict_chr_n = {}; 
     # Defino l_head para las distintas matrices
-    l_head_sitios_out = l_head_sitios_in + ['str_genes_rnaseq_cerca'] + l_otros_tf_pssm; 
+    l_head_sitios_out = l_head_sitios_in + ['str_genes_rnaseq_cerca'] + l_nom_pwm; 
     l_head_otro_tf = ['chr_n_otro_tf', 'pos_ini_otro_tf', 'pos_end_otro_tf', 'seq_union_otro_tf', 'fuente_otro_tf', 'score_otro_tf', 'nom_otro_tf'] + l_head_sitios_in + ['str_genes_rnaseq_cerca']; 
     # Guardo las matrices con guardar_matriz()
     M_sitios_out = guardar_matriz(nom_out+'_sitios_genes', M_sitios_out, path_out=path_out, l_head=l_head_sitios_out); 
