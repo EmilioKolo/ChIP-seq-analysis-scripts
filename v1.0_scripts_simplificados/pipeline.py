@@ -90,9 +90,11 @@ path_pwm_mouse = path_git_main + 'PWM_mouse\\';
 # Variables para pipelines
 
 organism = 'human'; # human o mouse
+dist_usada = 500000; 
+nom_dist_usada = '500kpb'; # 1Mpb, 500kpb, 100kpb, 1500pb, 0pb
 
 correr_generador = False; 
-dist_max_main = 100000; 
+dist_max_main = dist_usada; 
 L_confirmados = ['GCAAGTG', 'GGAAGTG', 'GAAAGTG', 'ATAAGTG', 'GTAAGTG', 'CTAAGTG', 'TCAAGTG', 'TGAAGTG', 'TAAAGTG', 'TTAAGTG']; 
 nom_pssm_nkx25_human = 'NKX25_HUMAN.H11MO.0.B.pcm'; 
 nom_pssm_nkx25_mouse = 'NKX25_MOUSE.H11MO.0.A.pcm'; 
@@ -101,10 +103,11 @@ test_used = 0; # 0 para correr todo completo, numeros mayores a 0 para correr su
 
 correr_memechip = False; 
 largo_memechip = 1500; 
+nom_ref_memechip = '_peaks'; # _sitios_union o _peaks
 
 correr_otros_tf = True; 
 dist_otros_tf = 1000; 
-dist_max_main_otros_tf = 100000; 
+dist_max_main_otros_tf = dist_usada; 
 nom_ref_otros_tf = '_sitios_union'; # _sitios_union o _peaks
 
 # Listas otros TFs (VIEJAS)
@@ -164,10 +167,10 @@ def _main():
                                                     L_su=L_confirmados, test_mode=test_used, id_col_rnaseq=id_col_usado, updown_col_rnaseq=updown_col_usado, l_translate=l_translate); 
 
     if correr_memechip:
-        path_input_memechip = path_out_main + '100kpb\\'; 
-        path_output_memechip = path_out_main + '100kpb\\'; 
-        nom_input_meme_chip = nom_output+'_peaks'; 
-        nom_fasta_out = nom_input_meme_chip+'_fasta_nofilt_total'; 
+        path_input_memechip = path_out_main + nom_dist_usada + '\\'; 
+        path_output_memechip = path_out_main + nom_dist_usada + '\\'; 
+        nom_input_meme_chip = nom_output + nom_ref_memechip; 
+        nom_fasta_out = nom_input_meme_chip + '_fasta_nofilt_total'; 
         #l_filt_usado = [[7, '0']]; 
         l_filt_usado = []; 
         default_filt = len(l_filt_usado)==0; 
@@ -175,10 +178,10 @@ def _main():
                                            path_sitios=path_input_memechip, path_out=path_output_memechip, path_fasta=path_fasta_main); 
 
     if correr_otros_tf:
-        nom_input_otros_tf = nom_output+nom_ref_otros_tf; 
-        nom_genes_otros_tf = nom_output+'_genes'; 
+        nom_input_otros_tf = nom_output + nom_ref_otros_tf; 
+        nom_genes_otros_tf = nom_output + '_genes'; 
         nom_out_otros_tf = nom_input_otros_tf + '_otros_tf'; 
-        path_input_otros_tf = path_out_main + '100kpb\\'; 
+        path_input_otros_tf = path_out_main + nom_dist_usada + '\\'; 
         M_sitios_out, M_sitios_otros_tf = pipeline_otros_tf(nom_input_otros_tf, nom_genes_otros_tf, nom_out_otros_tf, nom_genoma_usado, l_pwm_usado, dist_sitios=dist_otros_tf, 
                                                             dist_max_gen=dist_max_main_otros_tf, l_nom_pwm=l_nom_pwm_usado, 
                                                             path_sitios=path_input_otros_tf, path_genes=path_input_otros_tf, path_out=path_out_main, path_fasta=path_fasta_main, path_pwm=path_pwm_usado); 
@@ -389,6 +392,8 @@ def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist
     # Inicializo las matrices de output
     M_otros_tf = []; 
     M_sitios_out = []; 
+    # Inicializo un contador de sitios salteados
+    cont_salteados = 0; 
     # Obtengo la secuencia de todos los archivos fasta del genoma con elementos SeqIO
     dict_chr_n = seqio_chr_n(M_sitios, nombre_genoma, path_fasta); 
     # Recorro M_sitios
@@ -416,22 +421,24 @@ def pipeline_otros_tf(nom_sitios, nom_genes, nom_out, nombre_genoma, l_pwm, dist
             str_genes_cerca = str_genes_cerca.rstrip(sep); 
             # Agrego una columna a M_sitios_out con curr_sitio
             M_sitios_out.append(curr_sitio[:]); 
-            # Agrego str_genes_cerca al final de M_sitios_out[i]
-            M_sitios_out[i].append(str(str_genes_cerca)); 
+            # Agrego str_genes_cerca al final de M_sitios_out[i-cont_salteados]
+            M_sitios_out[i-cont_salteados].append(str(str_genes_cerca)); 
             # Inicializo una lista de otros factores de transcripcion para registrar los sitios de union cerca de curr_sitio
             l_otros_tf = [0]*len(l_nom_pwm); 
             # Recorro M_sitios_otros_tf
             for j in range(len(M_sitios_otros_tf)):
                 curr_otro_tf = M_sitios_otros_tf[j]; 
-                # Agrego curr_otro_tf y M_sitios_out[i] a M_otros_tf
-                M_otros_tf.append(curr_otro_tf + M_sitios_out[i]); 
+                # Agrego curr_otro_tf y M_sitios_out[i-cont_salteados] a M_otros_tf
+                M_otros_tf.append(curr_otro_tf + M_sitios_out[i-cont_salteados]); 
                 # Anoto el tf actual en l_otros_tf
                 if curr_otro_tf[6] in l_nom_pwm:
                     l_otros_tf[l_nom_pwm.index(curr_otro_tf[6])]=1; 
                 else:
                     print('ERROR: sitio otro tf no encontrado en l_nom_pwm. Lista del sitio: ' + str(curr_otro_tf))
-            # Agrego l_otros_tf a M_sitios_out[i]
-            M_sitios_out[i] = M_sitios_out[i] + l_otros_tf; 
+            # Agrego l_otros_tf a M_sitios_out[i-cont_salteados]
+            M_sitios_out[i-cont_salteados] = M_sitios_out[i-cont_salteados] + l_otros_tf; 
+        else:
+            cont_salteados = cont_salteados + 1; 
         ### Display
         if ((i+1)%250==0) or i==0:
             print('Progreso: ' + str(i+1) + ' de ' + str(n_sitios))
