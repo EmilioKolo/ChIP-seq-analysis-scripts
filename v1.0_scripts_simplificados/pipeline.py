@@ -123,6 +123,75 @@ L_arch_pwm_humano = ['NKX25_HUMAN.H11MO.0.B.pcm', 'TBX20_HUMAN.H11MO.0.D.pcm', '
                      'GATA4_HUMAN.H11MO.0.A.pcm', 'TAL1_HUMAN.H11MO.0.A.pcm', 'MAF_HUMAN.H11MO.1.B.pcm']; 
 L_nombres_pssm_humano = ['NKX25', 'TBX20', 'MEIS1', 'TGIF1', 'GATA4', 'TAL1', 'MAF']; 
 
+correr_prueba = False; 
+
+'''Revision manual de puntajes de corte
+
+> NKX25 https://hocomoco11.autosome.org/motif/NKX25_HUMAN.H11MO.0.B
+p-val   threshold
+0.001   5.508195000000001
+0.0005  5.9641
+0.0001  6.755
+
+Score maximo: 10.48918629380341
+Score maximo*0.9: 9.44026766442307
+
+> TBX20 https://hocomoco11.autosome.org/motif/TBX20_HUMAN.H11MO.0.D
+p-val   threshold
+0.001   4.51026
+0.0005  5.478009999999999
+0.0001  7.46656
+
+Score maximo: 19.020590001698444
+Score maximo*0.9: 17.118531001528602
+
+> MEIS1 https://hocomoco11.autosome.org/motif/MEIS1_HUMAN.H11MO.1.B
+p-val   threshold
+0.001   5.260465
+0.0005  6.16724
+0.0001  7.485995
+
+Score maximo: 13.289412237459725
+Score maximo*0.9: 11.960471013713754
+
+> TGIF1 https://hocomoco11.autosome.org/motif/TGIF1_HUMAN.H11MO.0.A
+p-val   threshold
+0.001   5.451875
+0.0005  5.796595
+0.0001  7.21926
+
+Score maximo: 11.55783662056813
+Score maximo*0.9: 10.402052958511318
+
+> GATA4 https://hocomoco11.autosome.org/motif/GATA4_HUMAN.H11MO.0.A
+p-val   threshold
+0.001   5.025895
+0.0005  5.99127
+0.0001  8.02586
+
+Score maximo: 15.064801054077325
+Score maximo*0.9: 13.558320948669593
+
+> TAL1 https://hocomoco11.autosome.org/motif/TAL1_HUMAN.H11MO.0.A
+p-val   threshold
+0.001   3.89111
+0.0005  5.00076
+0.0001  7.25471
+
+Score maximo: 22.11366971669817
+Score maximo*0.9: 19.902302745028354
+
+> MAF https://hocomoco11.autosome.org/motif/MAF_HUMAN.H11MO.1.B
+p-val   threshold
+0.001   5.13186
+0.0005  6.124365
+0.0001  7.77758
+
+Score maximo: 13.19939125618575
+Score maximo*0.9: 11.879452130567175
+
+'''
+
 
 #################################### FUNCIONES ####################################
 
@@ -185,6 +254,16 @@ def _main():
         M_sitios_out, M_sitios_otros_tf = pipeline_otros_tf(nom_input_otros_tf, nom_genes_otros_tf, nom_out_otros_tf, nom_genoma_usado, l_pwm_usado, dist_sitios=dist_otros_tf, 
                                                             dist_max_gen=dist_max_main_otros_tf, l_nom_pwm=l_nom_pwm_usado, 
                                                             path_sitios=path_input_otros_tf, path_genes=path_input_otros_tf, path_out=path_out_main, path_fasta=path_fasta_main, path_pwm=path_pwm_usado); 
+
+    if correr_prueba:
+        # Recorro la lista de nombres de matrices de peso
+        for i in range(len(l_pwm_usado)):
+            curr_nom_pwm = l_nom_pwm_usado[i]; 
+            curr_pssm = abrir_pssm(l_pwm_usado[i], path_arch=path_pwm_usado, solo_pssm=True); 
+            print('### PSSM para ' + curr_nom_pwm)
+            print('Score maximo: ' + str(curr_pssm.max))
+            print('Score maximo*0.9: ' + str(curr_pssm.max*0.9))
+            print()
 
     return ''
 
