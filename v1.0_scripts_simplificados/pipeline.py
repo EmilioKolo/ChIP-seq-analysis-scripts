@@ -82,7 +82,7 @@ else:
     path_fasta_main = path_fasta_casa; 
     path_output_dump_main = path_output_dump_casa; 
 path_in_main = path_git_main; ### Cambiar si es necesario
-path_out_main = path_output_dump_main + 'output_git\\'; 
+path_out_main = path_output_dump_main + 'output_git\\final_tesis\\'; 
 # Path que dependen de la especie
 path_pwm_human = path_git_main + 'PWM_human\\'; 
 path_pwm_mouse = path_git_main + 'PWM_mouse\\'; 
@@ -90,10 +90,10 @@ path_pwm_mouse = path_git_main + 'PWM_mouse\\';
 # Variables para pipelines
 
 organism = 'human'; # human o mouse
-dist_usada = 500000; 
-nom_dist_usada = '500kpb'; # 1Mpb, 500kpb, 100kpb, 1500pb, 0pb
+dist_usada = 100000; 
+nom_dist_usada = '100kpb'; # 1Mpb, 500kpb, 100kpb, 1500pb, 0pb
 
-correr_generador = False; 
+correr_generador = True; 
 dist_max_main = dist_usada; 
 L_confirmados = ['GCAAGTG', 'GGAAGTG', 'GAAAGTG', 'ATAAGTG', 'GTAAGTG', 'CTAAGTG', 'TCAAGTG', 'TGAAGTG', 'TAAAGTG', 'TTAAGTG']; 
 nom_pssm_nkx25_human = 'NKX25_HUMAN.H11MO.0.B.pcm'; 
@@ -101,12 +101,12 @@ nom_pssm_nkx25_mouse = 'NKX25_MOUSE.H11MO.0.A.pcm';
 score_mult = 0.9; # Multiplicador del score maximo de pssm que se usa como cutoff
 test_used = 0; # 0 para correr todo completo, numeros mayores a 0 para correr subsets de largo test_used
 
-correr_memechip = False; 
-largo_memechip = 1500; 
+correr_memechip = True; 
+largo_memechip = 500; 
 nom_ref_memechip = '_peaks'; # _sitios_union o _peaks
 
 correr_otros_tf = True; 
-dist_otros_tf = 1000; 
+dist_otros_tf = 250; 
 dist_max_main_otros_tf = dist_usada; 
 nom_ref_otros_tf = '_sitios_union'; # _sitios_union o _peaks
 
@@ -231,8 +231,9 @@ def _main():
     score_cutoff_pssm = pssm_usado.max*score_mult; 
     
     if correr_generador:
+        path_out_generador = path_out_main + nom_dist_usada + '\\'; 
         M_peaks, M_su, M_genes = pipeline_generador(nom_bed_usado, nom_rnaseq_usado, nom_output, genoma_usado, nom_genoma_usado, pssm_usado, score_cutoff_pssm, 
-                                                    path_bed=path_git_main, path_out=path_out_main, path_fasta=path_fasta_main, dist_max_gen=dist_max_main, 
+                                                    path_bed=path_git_main, path_out=path_out_generador, path_fasta=path_fasta_main, dist_max_gen=dist_max_main, 
                                                     L_su=L_confirmados, test_mode=test_used, id_col_rnaseq=id_col_usado, updown_col_rnaseq=updown_col_usado, l_translate=l_translate); 
 
     if correr_memechip:
