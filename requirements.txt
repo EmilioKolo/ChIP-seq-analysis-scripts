@@ -1,0 +1,8 @@
+# Core dependencies
+numpy==2.4.4
+pandas==3.0.3
+
+# Bioinformatics tools
+pyensembl==2.10.1
+biopython==1.87
+pyfaidx==0.9.0.4
